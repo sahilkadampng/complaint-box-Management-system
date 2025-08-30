@@ -21,6 +21,14 @@ function maskText(text: string) {
 
 export const generateComplaintPDF = (complaint: ComplaintData) => {
     const doc = new jsPDF();
+    const now = new Date();
+
+    // ✅ Correct way to pass options
+    const formattedDate = now.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
 
     // Header
     doc.setFontSize(40);
@@ -42,9 +50,10 @@ export const generateComplaintPDF = (complaint: ComplaintData) => {
         `Title: ${complaint.title}`,
         `Category: ${complaint.category}`,
         `Student Name: ${maskText(complaint.studentName)}`,
-        `Date & Time: ${new Date(complaint.createdAt).toLocaleString()}`,
+        `${formattedDate}`,
         `Status: ${complaint.status.toUpperCase()}`
     ];
+
 
     let yPosition = 65;
     details.forEach((detail) => {

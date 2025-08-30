@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import ComplaintList from '@/components/ComplaintList';
-import Navbar from '@/components/Navbar';
+// import ComplaintList from '@/components/ComplaintList';
+import SimpleComplaintRow from '@/components/SimpleComplaintRow';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,20 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import {
-    FileText,
-    Filter,
-    Download,
-    Users,
-    CheckCircle,
-    AlertTriangle,
-} from 'lucide-react';
+import FacultyLayout from "@/components/FacultyLayout";
+import Sidebar from '@/components/Sidebar';
+import { FileText, Filter, Download, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { Complaint, ComplaintStatus } from '@/components/ComplaintForm';
 
 const FacultyDashboard: React.FC = () => {
     const { user: _user } = useAuth();
     const navigate = useNavigate();
+
 
     const [complaints, setComplaints] = useState<Complaint[]>([]);
     const [filteredComplaints, setFilteredComplaints] = useState<Complaint[]>([]);
@@ -32,7 +27,7 @@ const FacultyDashboard: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('newest');
 
-    // normalize legacy data (old "pending"/"resolved", no history)
+    // Normalize legacy data
     const normalize = (c: any): Complaint => {
         const created = c.createdAt ?? new Date().toISOString();
         let status: ComplaintStatus;
@@ -45,20 +40,11 @@ const FacultyDashboard: React.FC = () => {
             ? c.history
             : [{ status: 'submitted', date: created }];
 
-        // ensure current status exists in history
-        if (!history.find(h => h.status === status)) {
-            history.push({ status, date: created });
-        }
+        if (!history.find(h => h.status === status)) history.push({ status, date: created });
 
-        return {
-            ...c,
-            createdAt: created,
-            status,
-            history,
-        } as Complaint;
+        return { ...c, createdAt: created, status, history } as Complaint;
     };
 
-    // Load all complaints from localStorage on component mount
     useEffect(() => {
         const savedComplaints = localStorage.getItem('complaints');
         if (savedComplaints) {
@@ -67,7 +53,6 @@ const FacultyDashboard: React.FC = () => {
         }
     }, []);
 
-    // Filter and sort complaints
     useEffect(() => {
         let filtered = complaints.filter(complaint => {
             const matchesSearch =
@@ -81,7 +66,6 @@ const FacultyDashboard: React.FC = () => {
             return matchesSearch && matchesStatus && matchesCategory;
         });
 
-        // Sort complaints
         switch (sortBy) {
             case 'newest':
                 filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -107,14 +91,10 @@ const FacultyDashboard: React.FC = () => {
                 ? {
                     ...complaint,
                     status: newStatus,
-                    history: [
-                        ...complaint.history,
-                        { status: newStatus, date: new Date().toISOString() }
-                    ]
+                    history: [...complaint.history, { status: newStatus, date: new Date().toISOString() }]
                 }
                 : complaint
         );
-
         setComplaints(updatedComplaints);
         saveComplaintsToStorage(updatedComplaints);
     };
@@ -122,48 +102,98 @@ const FacultyDashboard: React.FC = () => {
     const handleRegisterUser = () => navigate('/register');
 
     const handleExport = () => {
-        const doc = new jsPDF();
-
-        // Add title
-        doc.setFontSize(20);
-        doc.text('DYPDPU Complaint Report', 14, 22);
-
-        // Add generation date
-        doc.setFontSize(12);
-        doc.text(`Downloaded on: ${new Date().toLocaleDateString()}`, 14, 32);
-        doc.text(`(${new Date().toLocaleTimeString()})`, 68, 32);
-
-        // Prepare table data
-        const tableData = filteredComplaints.map(complaint => [
-            complaint.id,
-            complaint.title,
-            complaint.category,
-            complaint.studentId,
-            new Date(complaint.createdAt).toLocaleDateString(),
-            complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1).replace('_', ' ')
-        ]);
-
-        // Add table
-        doc.setFont("arial");
-        autoTable(doc, {
-            head: [['ID', 'Title', 'Category', 'Student', 'Date', 'Status']],
-            body: tableData,
-            startY: 40,
-            styles: { fontSize: 10, cellPadding: 3 },
-            headStyles: { fillColor: [59, 130, 246], textColor: 255, fontStyle: 'bold' },
-            alternateRowStyles: { fillColor: [245, 245, 245] }
+        const doc = new jsPDF({
+            orientation: "portrait",
+            unit: "pt",
+            format: "a4"
         });
-        const pageHeight = (doc as any).internal.pageSize.height;
-        doc.setFontSize(10);
-        doc.setTextColor(128, 128, 128);
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, pageHeight - 20);
-        doc.text('DYPDPU Complaint Panel', 20, pageHeight - 10);
 
-        // Save the PDF
-        doc.save(`DPU-ComplaintReport(${new Date().toLocaleTimeString()}).pdf`);
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString();
+        const formattedTime = now.toLocaleTimeString();
+
+        // -------------------- HEADER --------------------
+        doc.setFontSize(22);
+        doc.setTextColor(40, 40, 40);
+        doc.text("DYPDPU — Complaint Report", 40, 40);
+
+        doc.setFontSize(11);
+        doc.setTextColor(90, 90, 90);
+        doc.text(`Generated on: ${formattedDate}  ${formattedTime}`, 40, 60);
+
+        // -------------------- TABLE DATA --------------------
+        const maskName = (name: string): string => {
+            if (!name) return "Unknown";
+
+            // show last 2 characters only
+            const visible = name.slice(-2);
+            const hidden = "*".repeat(name.length - 2);
+
+            return hidden + visible;
+        };
+
+        const truncateText = (text: string, max = 20): string => {
+            if (!text) return "";
+            return text.length > max ? text.slice(0, max) + "..." : text;
+        };
+
+        const tableData = filteredComplaints.map((c) => [
+            c.id,
+            truncateText(c.title),
+            c.category,
+            maskName(c.studentName),
+            new Date(c.createdAt).toLocaleDateString(),
+            c.status.charAt(0).toUpperCase() + c.status.slice(1).replace("_", " ")
+        ]);
+        autoTable(doc, {
+            startY: 80,
+            head: [["ID", "Title", "Category", "Student", "Date", "Status"]],
+            body: tableData,
+
+            // Modern styling
+            theme: "grid",
+            headStyles: {
+                fillColor: [30, 55, 153],       // Blue header
+                textColor: 255,
+                fontStyle: "bold",
+                fontSize: 12,
+            },
+            styles: {
+                fontSize: 10,
+                cellPadding: 6,
+                textColor: 60,
+                valign: "middle",
+            },
+            alternateRowStyles: {
+                fillColor: [245, 247, 255]      // soft blue tint
+            },
+            margin: { left: 40, right: 40 },
+        });
+        const internalDoc: any = (doc as any).internal;
+        const pageCount = typeof internalDoc.getNumberOfPages === "function"
+            ? internalDoc.getNumberOfPages()
+            : 1;
+
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+
+            doc.setFontSize(10);
+            doc.setTextColor(120, 120, 120);
+
+            // Left footer
+            doc.text(`Generated on: ${now.toLocaleString()}`, 40, pageHeight - 35);
+            doc.text('DYPDPU Complaint Panel', 40, pageHeight - 20);
+
+            // Right aligned page number
+            doc.text(`Page ${i} of ${pageCount}`, pageWidth - 80, pageHeight - 20);
+        }
+        const fileName = `DPU-ComplaintReport(${now.toLocaleTimeString().replace(/:/g, ':')}).pdf`;
+        doc.save(fileName);
     };
 
-    // Calculate statistics
     const stats = {
         total: complaints.length,
         submitted: complaints.filter(c => c.status === 'submitted').length,
@@ -176,10 +206,8 @@ const FacultyDashboard: React.FC = () => {
             : 0
     };
 
-    // Get categories for filter
     const categories = Array.from(new Set(complaints.map(c => c.category)));
 
-    // Clear all filters
     const clearFilters = () => {
         setSearchTerm('');
         setFilterStatus('all');
@@ -187,23 +215,13 @@ const FacultyDashboard: React.FC = () => {
         setSortBy('newest');
     };
 
-    // Auto-escalate complaints older than 7 days
     const checkEscalations = (complaints: Complaint[]): Complaint[] => {
         const now = new Date();
         return complaints.map(c => {
-            if (
-                c.status !== "resolved" &&
-                c.status !== "escalated" &&
+            if (c.status !== "resolved" && c.status !== "escalated" &&
                 new Date(c.createdAt).getTime() < now.getTime() - 7 * 24 * 60 * 60 * 1000
             ) {
-                return {
-                    ...c,
-                    status: "escalated" as ComplaintStatus,
-                    history: [
-                        ...c.history,
-                        { status: "escalated" as ComplaintStatus, date: new Date().toISOString() }
-                    ],
-                };
+                return { ...c, status: "escalated" as ComplaintStatus, history: [...c.history, { status: "escalated" as ComplaintStatus, date: new Date().toISOString() }] };
             }
             return c;
         });
@@ -216,232 +234,238 @@ const FacultyDashboard: React.FC = () => {
         localStorage.setItem("complaints", JSON.stringify(checked));
     }, []);
 
-
     return (
-        <div className="min-h-screen bg-background">
-            <Navbar />
+        <FacultyLayout>
+            <div className="font-vend flex w-full">
 
-            {/* Header */}
-            <div className="bg-white text-primary-foreground">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div className="bg-white text-primary-foreground p-8 items-center justify-between">
-                        <h1 className="text-2xl font-bold mb-1 text-black">Faculty Dashboard</h1>
-                        <p className="text-black">Manage and resolve student complaints efficiently</p>
+                {/*  */}
+                {/* <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-50"> */}
+                <Sidebar />
+                {/* </div> */}
+
+                {/* Main Content */}
+                <div className="flex-1 h-screen overflow-y-auto bg-background md:ml-0 ml-0">
+                    {/* Header */}
+                    <div className="bg-white text-primary-foreground">
+                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-8">
+                            <div className="mb-4 md:mb-0">
+                                <h1 className="text-2xl font-bold mb-1 text-black mb-3 mt-20">Faculty Dashboard</h1>
+                                <p className="text-black text-sm md:text-base">Manage and resolve student complaints efficiently</p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 md:gap-4 mt-4">
+                                <Button variant="secondary" size="sm" onClick={handleRegisterUser}>
+                                    <Users className="h-4 w-4 mr-2" /> Register New User
+                                </Button>
+                                <Button variant="secondary" size="sm" onClick={handleExport}>
+                                    <Download className="h-4 w-4 mr-2" /> Export Report
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex items-center space-x-4 pr-8">
-                        <Button variant="secondary" size="sm" onClick={handleRegisterUser}>
-                            <Users className="h-4 w-4 mr-2" />
-                            Register New User
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={handleExport}>
-                            <Download className="h-4 w-4 mr-2" />
-                            Export Report
-                        </Button>
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => {
-                                localStorage.clear();
-                                window.location.reload();
-                            }}
-                        >
-                            Clear Local Data
-                        </Button>
+                    <hr className="border-t border-gray-200 mt-[3px]" />
+
+                    {/* Statistics + Filters + Table */}
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-gray-100 min-h-screen rounded-md">
+                        <h1 className="mb-4 font-vend text-xl font-bold mb-1 text-black">Overview</h1>
+                        {/* Statistics Cards */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                            <Card className="shadow-card rounded-md">
+                                <CardContent className="p-4 sm:p-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-sm font-medium text-muted-foreground">Total Complaints</p>
+                                            <p className="text-xl font-bold text-foreground">{stats.total}</p>
+                                        </div>
+                                        <FileText className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="shadow-card rounded-md">
+                                <CardContent className="p-4 sm:p-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-sm font-medium text-muted-foreground">Submitted</p>
+                                            <p className="text-xl font-bold text-foreground">{stats.submitted}</p>
+                                        </div>
+                                        <AlertTriangle className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="shadow-card rounded-md">
+                                <CardContent className="p-4 sm:p-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-sm font-medium text-muted-foreground">In Review / Assigned</p>
+                                            <p className="text-xl font-bold text-foreground">{stats.in_review + stats.assigned}</p>
+                                        </div>
+                                        <AlertTriangle className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card className="shadow-card rounded-md">
+                                <CardContent className="p-4 sm:p-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <p className="text-sm font-medium text-muted-foreground">Resolved (Rate)</p>
+                                            <p className="text-xl font-bold text-foreground">
+                                                {stats.resolved} ({stats.resolutionRate}%)
+                                            </p>
+                                        </div>
+                                        <CheckCircle className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+                            {/* Filters Sidebar */}
+                            <div className="col-span-12 lg:col-span-3">
+                                <Card className="shadow-card rounded-md sticky top-[70px] max-h-[75vh] overflow-y-auto">
+                                    <CardHeader>
+                                        <div className="flex items-center justify-between">
+                                            <CardTitle className="text-lg flex items-center">
+                                                <Filter className="h-5 w-5 mr-2" /> Filters
+                                            </CardTitle>
+                                            <Button variant="outline" size="sm" onClick={clearFilters}>
+                                                Clear All
+                                            </Button>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4 sm:space-y-6">
+                                        {/* Search */}
+                                        <div>
+                                            <label className="text-sm font-medium text-foreground mb-1 block">
+                                                Search complaints...
+                                            </label>
+                                            <Input
+                                                type="text"
+                                                placeholder="Search by title, description, or ID"
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="w-full"
+                                            />
+                                        </div>
+
+                                        {/* Category Filter */}
+                                        <div>
+                                            <label className="text-sm font-medium text-foreground mb-1 block">
+                                                Category
+                                            </label>
+                                            <Select value={filterCategory} onValueChange={setFilterCategory}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="All Categories" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All Categories</SelectItem>
+                                                    {categories.map((category) => (
+                                                        <SelectItem key={category} value={category}>
+                                                            {category}
+                                                            <Badge variant="secondary" className="ml-2">
+                                                                {complaints.filter((c) => c.category === category).length}
+                                                            </Badge>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Status Filter */}
+                                        <div>
+                                            <label className="text-sm font-medium text-foreground mb-1 block">
+                                                Status
+                                            </label>
+                                            <Select value={filterStatus} onValueChange={setFilterStatus as any}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="All Statuses" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="submitted">Submitted</SelectItem>
+                                                    <SelectItem value="in_review">In Review</SelectItem>
+                                                    <SelectItem value="assigned">Assigned</SelectItem>
+                                                    <SelectItem value="resolved">Resolved</SelectItem>
+                                                    <SelectItem value="escalated">Escalated</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Main Content */}
+                            <div className="col-span-12 lg:col-span-9">
+                                <Card className="shadow-card rounded-md">
+                                    <CardHeader>
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                                            <div>
+                                                <CardTitle className="text-lg">
+                                                    Showing {filteredComplaints.length} of {complaints.length} complaints
+                                                </CardTitle>
+                                                <p className="text-sm text-muted-foreground mt-1">
+                                                    Sort by:{' '}
+                                                    {sortBy === 'newest'
+                                                        ? 'Newest First'
+                                                        : sortBy === 'oldest'
+                                                            ? 'Oldest First'
+                                                            : 'Title'}
+                                                </p>
+                                            </div>
+                                            <Select value={sortBy} onValueChange={setSortBy}>
+                                                <SelectTrigger className="w-full sm:w-40">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="newest">Newest First</SelectItem>
+                                                    <SelectItem value="oldest">Oldest First</SelectItem>
+                                                    <SelectItem value="title">Title</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {filteredComplaints.length === 0 ? (
+                                            <div className="text-center py-12">
+                                                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                                                <h3 className="text-lg font-semibold text-foreground mb-2">No complaints found</h3>
+                                                <p className="text-muted-foreground">
+                                                    {complaints.length === 0
+                                                        ? 'No complaints have been submitted yet.'
+                                                        : 'Try adjusting your filters to see more results.'}
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="border rounded-md overflow-hidden">
+
+                                                {/* Header Row */}
+                                                <div className="grid grid-cols-6 gap-4 py-3 px-4 bg-gray-200 font-semibold text-sm">
+                                                    <span>ID</span>
+                                                    <span>Title</span>
+                                                    <span>Student</span>
+                                                    <span>Category</span>
+                                                    <span>Status</span>
+                                                    {/* <span>Date</span> */}
+                                                </div>
+
+                                                {/* Dynamic Rows */}
+                                                {filteredComplaints.map((c) => (
+                                                    <SimpleComplaintRow
+                                                        key={c.id}
+                                                        complaint={c}
+                                                        onStatusChange={handleStatusChange}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Statistics Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 rounded-md">
-                    <Card className="shadow-card rounded-md">
-                        <CardContent className="p-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Total Complaints</p>
-                                    <p className="text-xl font-bold text-foreground">{stats.total}</p>
-                                </div>
-                                <FileText className="h-4 w-4 text-gray-400" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-card rounded-md">
-                        <CardContent className="p-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Submitted</p>
-                                    <p className="text-xl font-bold text-foreground">{stats.submitted}</p>
-                                </div>
-                                <AlertTriangle className="h-4 w-4 text-gray-400" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-card rounded-md">
-                        <CardContent className="p-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">In Review / Assigned</p>
-                                    <p className="text-xl font-bold text-foreground">{stats.in_review + stats.assigned}</p>
-                                </div>
-                                <AlertTriangle className="h-4 w-4 text-gray-400" />
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="shadow-card rounded-md">
-                        <CardContent className="p-6">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Resolved (Rate)</p>
-                                    <p className="text-xl font-bold text-foreground">
-                                        {stats.resolved} ({stats.resolutionRate}%)
-                                    </p>
-                                </div>
-                                <CheckCircle className="h-4 w-4 text-gray-400" />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div className="grid grid-cols-12 gap-6 rounded-md">
-                    {/* Filters Sidebar */}
-                    <div className="col-span-12 lg:col-span-3">
-                        <Card className="shadow-card rounded-md">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-lg flex items-center">
-                                        <Filter className="h-5 w-5 mr-2" />
-                                        Filters
-                                    </CardTitle>
-                                    <Button variant="outline" size="sm" onClick={clearFilters}>
-                                        Clear All
-                                    </Button>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                {/* Search */}
-                                <div>
-                                    <label className="text-sm font-medium text-foreground mb-2 block">
-                                        Search complaints...
-                                    </label>
-                                    <Input
-                                        type="text"
-                                        placeholder="Search by title, description, or ID"
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full"
-                                    />
-                                </div>
-
-                                {/* Category Filter */}
-                                <div>
-                                    <label className="text-sm font-medium text-foreground mb-2 block">
-                                        Category
-                                    </label>
-                                    <Select value={filterCategory} onValueChange={setFilterCategory}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="All Categories" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Categories</SelectItem>
-                                            {categories.map(category => (
-                                                <SelectItem key={category} value={category}>
-                                                    {category}
-                                                    <Badge variant="secondary" className="ml-2">
-                                                        {complaints.filter(c => c.category === category).length}
-                                                    </Badge>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                {/* Status Filter */}
-                                <div>
-                                    <label className="text-sm font-medium text-foreground mb-2 block">
-                                        Status
-                                    </label>
-                                    <Select value={filterStatus} onValueChange={setFilterStatus as any}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="All Statuses" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="submitted">Submitted</SelectItem>
-                                            <SelectItem value="in_review">In Review</SelectItem>
-                                            <SelectItem value="assigned">Assigned</SelectItem>
-                                            <SelectItem value="resolved">Resolved</SelectItem>
-                                            <SelectItem value="escalated">Escalated</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Separator />
-
-                                {/* Date Range - placeholder */}
-                                <div>
-                                    <label className="text-sm font-medium text-foreground mb-2 block">
-                                        Date Range
-                                    </label>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        <Input type="date" placeholder="From Date" />
-                                        <Input type="date" placeholder="To Date" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Main Content */}
-                    <div className="col-span-12 lg:col-span-9">
-                        <Card className="shadow-card rounded-md">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-lg">
-                                            Showing {filteredComplaints.length} of {complaints.length} complaints
-                                        </CardTitle>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            Sort by: {sortBy === 'newest' ? 'Newest First' : sortBy === 'oldest' ? 'Oldest First' : 'Title'}
-                                        </p>
-                                    </div>
-                                    <Select value={sortBy} onValueChange={setSortBy}>
-                                        <SelectTrigger className="w-40">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="newest">Newest First</SelectItem>
-                                            <SelectItem value="oldest">Oldest First</SelectItem>
-                                            <SelectItem value="title">Title</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {filteredComplaints.length === 0 ? (
-                                    <div className="text-center py-12">
-                                        <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                                        <h3 className="text-lg font-semibold text-foreground mb-2">No complaints found</h3>
-                                        <p className="text-muted-foreground">
-                                            {complaints.length === 0
-                                                ? "No complaints have been submitted yet."
-                                                : "Try adjusting your filters to see more results."
-                                            }
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <ComplaintList
-                                        complaints={filteredComplaints}
-                                        onStatusChange={handleStatusChange}
-                                        showActions={true}
-                                    />
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </FacultyLayout >
     );
 };
 

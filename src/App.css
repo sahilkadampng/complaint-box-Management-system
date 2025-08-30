@@ -13,7 +13,7 @@
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em #959595aa);
 }
 
 .logo.react:hover {
@@ -42,4 +42,9 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Reusable hover class for select items */
+.select-item-hover {
+  @apply data-[highlighted]:bg-gray-100 data-[highlighted]:text-black transition-colors duration-150;
 }
