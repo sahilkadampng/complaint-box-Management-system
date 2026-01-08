@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
-    Users, Download, BarChart3, UserCog, Settings,
-    HelpCircle, LogOut, MoveLeft
+    Users, Download, BarChart3, UserCog, LogOut, MoveLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -39,14 +38,14 @@ const StudentSidebar: React.FC = () => {
 
             {/* Sidebar Drawer */}
             <div className={`
-        fixed top-0 left-0 h-full w-64 bg-white shadow-md p-0 flex flex-col gap-3
-        transform transition-transform duration-300
-        z-[150]
-        md:translate-x-0 md:static
-        ${open ? "translate-x-0" : "-translate-x-full"}
-    `}>
-
-
+    fixed top-0 left-0 h-full w-64 bg-white shadow-md p-0
+    flex flex-col gap-3
+    transform transition-transform duration-300
+    z-[150]
+    md:sticky md:top-0 md:h-screen
+    md:translate-x-0
+    ${open ? "translate-x-0" : "-translate-x-full"}`}
+            >
                 {/* Profile */}
                 <div
                     className="flex flex-col bg-gradient-to-r from-[#0099b5] to-[#00bcd4] items-center mb-1 mt-[4rem] cursor-pointer group"
@@ -80,17 +79,17 @@ const StudentSidebar: React.FC = () => {
 
                 {/* Navigation */}
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/faculty-dashboard')}>
+                    onClick={() => navigate('/student/dashboard')}>
                     <MoveLeft className="h-4 w-4 mr-2" /> Dashboard
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/register')}>
+                    onClick={() => navigate('/student/complaint/new')}>
                     <Users className="h-4 w-4 mr-2" /> Register New User
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/ReportsPage')}>
+                    onClick={() => navigate('/student/complaints"')}>
                     <Download className="h-4 w-4 mr-2" /> Reports
                 </Button>
 
@@ -100,10 +99,10 @@ const StudentSidebar: React.FC = () => {
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/UserManagementPage')}>
+                    onClick={() => navigate('/student/help')}>
                     <UserCog className="h-4 w-4 mr-2" /> User Management
                 </Button>
-
+                {/* 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
                     onClick={() => navigate('/settings')}>
                     <Settings className="h-4 w-4 mr-2" /> Settings
@@ -112,7 +111,7 @@ const StudentSidebar: React.FC = () => {
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
                     onClick={() => navigate('/help')}>
                     <HelpCircle className="h-4 w-4 mr-2" /> Help
-                </Button>
+                </Button> */}
 
                 <hr className="mt-[5rem]" />
 

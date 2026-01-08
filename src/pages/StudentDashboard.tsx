@@ -6,6 +6,7 @@ import ComplaintList from '@/components/ComplaintList';
 // import Navbar from '@/components/Navbar';
 import StudentSidebar from '@/components/StudentSidebar';
 import { Shield } from "lucide-react";
+import FacultyLayout from "@/components/FacultyLayout";
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,10 +17,6 @@ import { PlusCircle, FileText, BarChart3 } from 'lucide-react';
 import logo from '@/assets/DYPDPUUnitechsocietylogo1.png' // adjust path
 
 // === Illustrations (add your images to src/assets/) ===
-import studentIllustration from '@/assets/completed-steps-animate.svg';
-import submitIllustration from '@/assets/completed-steps-animate.svg';
-import decorBottomLeft from '@/assets/completed-steps-animate.svg';
-import decorBottomright from '@/assets/completed-steps-animate.svg';
 // ======================================================
 
 const StudentDashboard: React.FC = () => {
@@ -256,34 +253,13 @@ Thank you for helping us improve our institution and services. Your involvement 
     };
 
     return (
-        <div className="font-vend flex w-full">
-            {/* // made 'relative' so decorative absolute images position correctly — layout & logic unchanged */}
-            {/* <div className="min-h-screen bg-background relative"> */}
+        <FacultyLayout>
+            <div className="font-vend flex min-h-screen bg-background">
+                {/* Sidebar */}
                 <StudentSidebar />
 
-                {/* Decorative/illustration images (purely visual, hidden on small screens) */}
-                <img
-                    src={studentIllustration}
-                    alt="Student decor"
-                    className="hidden md:block pointer-events-none absolute left-6 top-28 w-56 opacity-10 select-none z-0"
-                />
-                <img
-                    src={submitIllustration}
-                    alt="Submit decor"
-                    className="hidden md:block pointer-events-none absolute right-6 top-28 w-56 opacity-10 select-none z-0"
-                />
-                <img
-                    src={decorBottomLeft}
-                    alt="Decor bottom left"
-                    className="hidden md:block pointer-events-none absolute left-8 bottom-8 w-56 opacity-10 select-none"
-                />
-                <img
-                    src={decorBottomright}
-                    alt="Decor bottom left"
-                    className="hidden md:block pointer-events-none absolute right-8 bottom-8 w-56 opacity-10 select-none"
-                />
 
-                <div className="max-w-7xl mx-auto px- sm:px-2 lg:px-8 py-10 p-4">
+                <div className="flex-1 overflow-y-auto py-10 p-6">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground mb-3 mt-10">Student Dashboard</h1>
                         <p className="text-muted-foreground">
@@ -300,7 +276,7 @@ Thank you for helping us improve our institution and services. Your involvement 
                     </Alert>
 
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 rounded-md">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="inline-grid grid-cols-3 bg-muted rounded-md">
                             <TabsTrigger value="overview" className="flex items-center gap-2 text-sm">
                                 <BarChart3 className="h-4 w-4" />
                                 Overview
@@ -364,11 +340,11 @@ Thank you for helping us improve our institution and services. Your involvement 
                                     {complaints.length === 0 ? (
                                         <div className="text-center py-8">
                                             {/* small decorative illustration for empty state */}
-                                            <img
+                                            {/* <img
                                                 src={studentIllustration}
                                                 alt="No complaints illustration"
                                                 className="mx-auto mb-4 w-36 opacity-10 hidden md:block"
-                                            />
+                                            /> */}
                                             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                                             <p className="text-muted-foreground mb-4">You haven't submitted any complaints yet.</p>
                                             <Button onClick={() => setActiveTab('submit')} className="bg-gradient-primary bg-sky-500">
@@ -588,7 +564,7 @@ Thank you for helping us improve our institution and services. Your involvement 
                     </Tabs>
                 </div>
             </div>
-        // </div>
+        </FacultyLayout >
     );
 };
 

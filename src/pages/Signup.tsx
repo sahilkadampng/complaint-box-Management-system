@@ -239,7 +239,7 @@ const Signup: React.FC = () => {
                     {/* Main Content */}
                     <div className="max-w-2xl mx-auto px-6 py-8">
                         <div className="text-center mb-8">
-                            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 bg-customOrange">
+                            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
                                 <GraduationCap className="h-8 w-8 text-primary-foreground" />
                             </div>
                             <h2 className="text-3xl font-bold text-foreground mb-2">Create Your Account</h2>
