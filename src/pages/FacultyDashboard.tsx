@@ -249,7 +249,7 @@ const FacultyDashboard: React.FC = () => {
                     <div className="bg-white text-primary-foreground">
                         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-8">
                             <div className="mb-4 md:mb-0">
-                                <h1 className="text-2xl font-bold mb-1 text-black mb-3 mt-20">Faculty Dashboard</h1>
+                                <h1 className="text-2xl font-bold mb-1 text-black mt-20">Faculty Dashboard</h1>
                                 <p className="text-black text-sm md:text-base">Manage and resolve student complaints efficiently</p>
                             </div>
                             <div className="flex flex-wrap gap-2 md:gap-4 mt-4">
@@ -266,7 +266,7 @@ const FacultyDashboard: React.FC = () => {
 
                     {/* Statistics + Filters + Table */}
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-gray-100 min-h-screen rounded-md">
-                        <h1 className="mb-4 font-vend text-xl font-bold mb-1 text-black">Overview</h1>
+                        <h1 className="mb-4 font-vend text-xl font-bold text-black">Overview</h1>
                         {/* Statistics Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
                             <Card className="shadow-card rounded-md">

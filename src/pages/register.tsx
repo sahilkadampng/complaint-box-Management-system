@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { GraduationCap, Users, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import Navbar from "@/components/Navbar";
+// import Navbar from "@/components/Navbar";
 import FacultyLayout from "@/components/FacultyLayout";
+import Sidebar from '@/components/Sidebar';
 
 const RegisterUserPage: React.FC = () => {
     const { signup, user } = useAuth();
@@ -122,8 +123,8 @@ const RegisterUserPage: React.FC = () => {
 
     return (
         <FacultyLayout>
-            <div className="min-h-screen bg-gradient-secondary">
-                <Navbar />
+            <div className="font-vend flex w-full">
+                <Sidebar />
 
                 <div className="max-w-2xl mx-auto px-6 py-8">
                     <Button className="bg-gray-100 hover:bg-gray-200 text-black shadow-sm mb-4 mt-20" onClick={() => navigate("/faculty-dashboard")}>

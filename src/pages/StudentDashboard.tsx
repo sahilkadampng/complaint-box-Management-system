@@ -3,7 +3,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import ComplaintForm, { type Complaint, type ComplaintStatus } from '@/components/ComplaintForm';
 import ComplaintList from '@/components/ComplaintList';
-import Navbar from '@/components/Navbar';
+// import Navbar from '@/components/Navbar';
+import StudentSidebar from '@/components/StudentSidebar';
 import { Shield } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -255,10 +256,10 @@ Thank you for helping us improve our institution and services. Your involvement 
     };
 
     return (
-        <div className="font-vend">
+        <div className="font-vend flex w-full">
             {/* // made 'relative' so decorative absolute images position correctly — layout & logic unchanged */}
-            <div className="min-h-screen bg-background relative">
-                <Navbar />
+            {/* <div className="min-h-screen bg-background relative"> */}
+                <StudentSidebar />
 
                 {/* Decorative/illustration images (purely visual, hidden on small screens) */}
                 <img
@@ -300,17 +301,17 @@ Thank you for helping us improve our institution and services. Your involvement 
 
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 rounded-md">
                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="overview" className="flex items-center gap-2">
+                            <TabsTrigger value="overview" className="flex items-center gap-2 text-sm">
                                 <BarChart3 className="h-4 w-4" />
                                 Overview
                             </TabsTrigger>
-                            <TabsTrigger value="submit" className="flex items-center gap-2">
+                            <TabsTrigger value="submit" className="flex items-center gap-2 text-sm">
                                 <PlusCircle className="h-4 w-4" />
-                                Submit Complaint
+                                Submit
                             </TabsTrigger>
-                            <TabsTrigger value="my-complaints" className="flex items-center gap-2 rounded-md">
+                            <TabsTrigger value="my-complaints" className="flex items-center gap-2 rounded-md text-sm">
                                 <FileText className="h-4 w-4" />
-                                My Complaints
+                                Complaints
                             </TabsTrigger>
                         </TabsList>
 
@@ -587,7 +588,7 @@ Thank you for helping us improve our institution and services. Your involvement 
                     </Tabs>
                 </div>
             </div>
-        </div>
+        // </div>
     );
 };
 

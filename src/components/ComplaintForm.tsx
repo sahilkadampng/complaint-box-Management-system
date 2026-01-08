@@ -179,13 +179,14 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({ complaint, onSubmit, onCa
                         <Input
                             id="title"
                             type="text"
+                            className="text-sm"
                             value={formData.title}
                             onChange={e => handleInputChange('title', e.target.value)}
                             maxLength={100}
                             placeholder="Brief description of the issue"
                             required
                         />
-                        <p className="text-sm text-gray-500">{formData.title.length}/100 characters</p>
+                        <p className="text-sm text-pink-500">{formData.title.length}/100 characters</p>
                     </div>
 
                     {/* Category */}
@@ -217,13 +218,14 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({ complaint, onSubmit, onCa
                         <Textarea
                             id="description"
                             value={formData.description}
+                            className="text-sm"
                             onChange={e => handleInputChange('description', e.target.value)}
                             placeholder="Please provide detailed information about your complaint. Include relevant dates, locations, and any other important details."
                             required
                             rows={6}
                             maxLength={1000}
                         />
-                        <p className="text-sm text-gray-500">{formData.description.length}/1000 characters</p>
+                        <p className="text-sm text-pink-500">{formData.description.length}/1000 characters</p>
                     </div>
 
                     {/* File Upload */}

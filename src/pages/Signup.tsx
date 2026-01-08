@@ -504,11 +504,11 @@ const Signup: React.FC = () => {
                                         />
                                         <Label htmlFor="terms" className="text-sm leading-relaxed">
                                             I agree to the{' '}
-                                            <Link to="#" className="text-primary hover:text-primary-dark font-medium">
+                                            <Link to="/terms" className="text-primary hover:text-primary-dark font-medium">
                                                 Terms and Conditions
                                             </Link>
                                             {' '}and{' '}
-                                            <Link to="#" className="text-primary hover:text-primary-dark font-medium">
+                                            <Link to="/privacy" className="text-primary hover:text-primary-dark font-medium">
                                                 Privacy Policy
                                             </Link>
                                             . By creating an account, you agree to our Terms of Service and Privacy Policy.

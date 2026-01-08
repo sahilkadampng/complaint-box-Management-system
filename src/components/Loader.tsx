@@ -1,15 +1,15 @@
 import styled from "styled-components";
 
 const Loader = () => {
-  return (
-    <StyledWrapper>
-      <div className="spinner center">
-        {[...Array(12)].map((_, i) => (
-          <div key={i} className="spinner-blade" />
-        ))}
-      </div>
-    </StyledWrapper>
-  );
+    return (
+        <StyledWrapper>
+            <div className="spinner center">
+                {[...Array(12)].map((_, i) => (
+                    <div key={i} className="spinner-blade" />
+                ))}
+            </div>
+        </StyledWrapper>
+    );
 };
 
 const StyledWrapper = styled.div`
@@ -43,15 +43,15 @@ const StyledWrapper = styled.div`
   }
 
   ${[...Array(12)]
-    .map(
-      (_, i) => `
+        .map(
+            (_, i) => `
       .spinner .spinner-blade:nth-child(${i + 1}) {
         animation-delay: ${(i * 0.083).toFixed(3)}s;
         transform: rotate(${i * 30}deg);
       }
     `
-    )
-    .join("")}
+        )
+        .join("")}
 
   @keyframes spinner-fade {
     0% {

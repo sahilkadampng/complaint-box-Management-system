@@ -37,9 +37,10 @@ export default function SettingsPage() {
         <FacultyLayout>
             <div className="font-vend flex w-full">
                 {/* Sidebar */}
-                <div className="hidden md:block fixed top-0 left-0 h-full w-64 bg-white shadow-md z-50">
+                <Sidebar />
+                {/* <div className="hidden md:block fixed top-0 left-0 h-full w-64 bg-white shadow-md z-50">
                     <Sidebar />
-                </div>
+                </div> */}
 
                 {/* Main Area */}
                 <div className="flex-1 md:ml-64 ml-0 bg-gray-50 min-h-screen relative">

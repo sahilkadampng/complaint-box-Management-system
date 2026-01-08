@@ -15,11 +15,11 @@ const FileUpload: React.FC<FormProps> = ({ id = 'file', onChange }) => {
                         <img
                             src="https://cdn-icons-png.flaticon.com/128/3175/3175637.png"
                             alt="Upload Icon"
-                            className="h-10 w-10"
+                            className="h-10 w-10 mt-6"
                         />
                     </div>
                     <p className="text-sm text-gray-600 mb-2">Upload supporting documents (images, PDFs, Word docs)</p>
-                    <p className="text-xs text-gray-500 mb-4">
+                    <p className="text-xs text-gray-500 mb-8">
                         Max 3 files, 5MB each. Supported: JPG, PNG, GIF, PDF, TXT, DOC, DOCX
                     </p>
                 </div>

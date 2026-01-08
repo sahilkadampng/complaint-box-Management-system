@@ -26,6 +26,8 @@ import HelpPage from "./pages/HelpPage";
 import ReportsPage from "./pages/ReportsPage";
 import ComplaintDetails from "./pages/ComplaintDetails";
 import UserManagementPage from "./pages/UserManagementPage";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 
 
@@ -117,6 +119,8 @@ const App = () => {
                                             <Route path="/ReportsPage" element={<ReportsPage />} />
                                             <Route path="/complaint/:id" element={<ComplaintDetails />} />
                                             <Route path="/UserManagementPage" element={<UserManagementPage />} />
+                                            <Route path="/terms" element={<Terms />} />
+                                            <Route path="/privacy" element={<Privacy />} />
                                             <Route path="/settings" element={
                                                 <ProtectedRoute>
                                                     <Settings />

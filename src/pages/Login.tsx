@@ -160,7 +160,7 @@ const Login: React.FC = () => {
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => navigate("/homepage")}>
+                                        onClick={() => navigate("/")}>
                                         ← Home
                                     </Button>
                                     <Button
@@ -185,7 +185,7 @@ const Login: React.FC = () => {
                                     <div className="flex items-center justify-between mb-6">
                                         <div className="text-sm text-muted-foreground">
                                             Logging in as:{" "}
-                                            <span className="font-medium capitalize">{selectedRole}</span>
+                                            <span className="font-medium text-pink-500 capitalize">{selectedRole}</span>
                                         </div>
                                         <Button
                                             variant="ghost"

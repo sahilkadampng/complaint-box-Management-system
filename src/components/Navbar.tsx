@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
                                             <div className="flex flex-col space-y-1 leading-none">
                                                 <p className="font-medium">{user?.name}</p>
                                                 <p className="text-xs text-muted-foreground">{user?.email}</p>
-                                                <p className="text-xs text-primary capitalize">{user?.role}</p>
+                                                <p className="text-xs text-pink-500 capitalize">{user?.role}</p>
                                             </div>
                                         </div>
                                         <DropdownMenuSeparator />

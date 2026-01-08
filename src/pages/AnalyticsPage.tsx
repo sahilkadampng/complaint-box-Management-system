@@ -249,7 +249,7 @@ const AnalyticsPage: React.FC = () => {
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-4">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-1 md:p-6">
                         <div>
-                            <h1 className="text-2xl font-bold mb-1 text-black mb-3 mt-10">Analytics Dashboard</h1>
+                            <h1 className="text-2xl font-bold text-black mb-3 mt-10">Analytics Dashboard</h1>
                             <p className="text-black text-sm md:text-base">Overview of complaint activity, trends and KPIs.</p>
                         </div>
 
