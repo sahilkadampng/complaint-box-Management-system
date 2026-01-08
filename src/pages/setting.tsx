@@ -36,32 +36,28 @@ export default function SettingsPage() {
     return (
         <FacultyLayout>
             <div className="font-vend flex w-full">
-                {/* Sidebar */}
+                {/* SIDEBAR */}
                 <Sidebar />
-                {/* <div className="hidden md:block fixed top-0 left-0 h-full w-64 bg-white shadow-md z-50">
-                    <Sidebar />
-                </div> */}
+                {/* MAIN AREA */}
+                <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
 
-                {/* Main Area */}
-                <div className="flex-1 md:ml-64 ml-0 bg-gray-50 min-h-screen relative">
-
-
-                    {/* Header */}
-                    <div className="bg-white shadow-sm mt-[64px]">
-                        <div className="max-w-7xl mx-auto p-6">
-                            <h1 className="text-3xl font-bold text-black">Settings</h1>
-                            <p className="text-sm text-gray-600 mt-1">
-                                Extract, analyze, and export detailed complaint data.
-                            </p>
+                    {/* ===========================
+                    TOP NAVBAR (same style as dashboard)
+                ============================ */}
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
+                        <div>
+                            <h1 className="text-2xl font-bold mb-1 text-black mt-10">Settings</h1>
+                            <p className="text-black text-sm md:text-base">Extract, analyze, and export detailed complaint data.</p>
                         </div>
                     </div>
 
-                    <div className="max-w-7xl mx-auto px-6 pt-4">
+                    <div className="max-w-7xl mx-auto px-2 pt-4">
+                        <hr className="my-4" />
                         <Breadcrumb current="Settings" />
                     </div>
 
                     {/* Content */}
-                    <main className="max-w-7xl mx-auto px-6 py-6 space-y-10">
+                    <main className="max-w-7xl mx-auto px-2 py-6 space-y-10">
 
                         {/* Profile Settings */}
                         <Card className="shadow-card">

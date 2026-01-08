@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-// import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -16,7 +15,6 @@ import dpuImg from '@/assets/DYPDPUUnitechsocietylogo1.png';
 
 const Navbar: React.FC = () => {
     const { user, isAuthenticated, logout } = useAuth();
-    // const { isDark, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -29,26 +27,24 @@ const Navbar: React.FC = () => {
         const parts = name.trim().split(/\s+/);
         const first = parts[0]?.[0] ?? '';
         const second = parts[1]?.[0] ?? '';
-        const initials = `${first}${second}`.toUpperCase();
-        return initials || 'U';
+        return `${first}${second}`.toUpperCase() || 'U';
     };
 
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-    React.useEffect(() => {
+    // ✅ SINGLE useEffect (fixed)
+    useEffect(() => {
         const handler = () => setSidebarOpen(prev => !prev);
         window.addEventListener("toggleSidebar", handler);
         return () => window.removeEventListener("toggleSidebar", handler);
     }, []);
 
-
     return (
         <div className="font-vend">
-            <nav className="fixed top-0 z-50 w-full border-b border-border bg-card/70 backdrop-blur shadow-card">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
+            <nav className="fixed top-0 z-50 w-full border-b border-border bg-card/70 backdrop-blur shadow-card md:pl-0">
+                <div className="px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center h-16">
                         <div className="flex items-center">
-                            {/*  Mobile Hamburger Button */}
                             <div className="md:hidden flex items-center">
                                 <button
                                     onClick={() => window.dispatchEvent(new Event("toggleSidebar"))}
@@ -56,34 +52,37 @@ const Navbar: React.FC = () => {
                                 >
                                     <span
                                         className={`
-                block h-[3px] w-7 bg-gray-800 rounded transition-all duration-300
-                ${sidebarOpen ? "rotate-45 translate-y-[8px] w-8" : ""}
-            `}
-                                    ></span>
+                                            block h-[3px] w-7 bg-gray-800 rounded transition-all duration-300
+                                            ${sidebarOpen ? "rotate-45 translate-y-[8px] w-8" : ""}
+                                        `}
+                                    />
                                     <span
                                         className={`
-                block h-[3px] w-7 bg-gray-800 rounded my-[6px] transition-all duration-0
-                ${sidebarOpen ? "opacity-0 bg-white" : ""}
-            `}
-                                    ></span>
+                                            block h-[3px] w-7 bg-gray-800 rounded my-[6px]
+                                            ${sidebarOpen ? "opacity-0 bg-white" : ""}
+                                        `}
+                                    />
                                     <span
                                         className={`
-                block h-[3px] w-7 bg-gray-800 rounded transition-all duration-300
-                ${sidebarOpen ? "-rotate-45 -translate-y-[8px] w-8" : ""}
-            `}
-                                    ></span>
+                                            block h-[3px] w-7 bg-gray-800 rounded transition-all duration-300
+                                            ${sidebarOpen ? "-rotate-45 -translate-y-[8px] w-8" : ""}
+                                        `}
+                                    />
                                 </button>
                             </div>
-                            <Link to="/" className="flex items-center space-x-2">
-                                <img
-                                    src={dpuImg}
-                                    width={90}
-                                    height={90}
-                                    alt="logo"
-                                    className="inline ml-5"
-                                />
-                            </Link>
+
+                            {sidebarOpen ? (
+                                <div className="hidden md:flex items-center ml-5 opacity-50 pointer-events-none md:pointer-events-auto transition-opacity duration-200">
+                                    <img src={dpuImg} width={90} height={90} alt="logo" />
+                                </div>
+                            ) : (
+                                <Link to="/" className="hidden md:flex items-center ml-5">
+                                    <img src={dpuImg} width={90} height={90} alt="logo" />
+                                </Link>
+                            )}
                         </div>
+
+                        <div className="flex-1" />
 
                         {isAuthenticated && user ? (
                             <div className="flex items-center space-x-4">

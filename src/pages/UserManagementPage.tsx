@@ -108,7 +108,7 @@ export default function UserManagementPage() {
                     {/* HEADER */}
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
                         <div>
-                            <h1 className="text-2xl font-bold mb-1 text-black mb-3 mt-10">
+                            <h1 className="text-2xl font-bold mb-3 text-black mt-10">
                                 User Management
                             </h1>
                             <p className="text-black text-sm md:text-base">

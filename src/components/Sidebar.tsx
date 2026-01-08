@@ -39,12 +39,14 @@ const Sidebar: React.FC = () => {
 
             {/* Sidebar Drawer */}
             <div className={`
-        fixed top-0 left-0 h-full w-64 bg-white shadow-md p-0 flex flex-col gap-3
-        transform transition-transform duration-300
-        z-[150]
-        md:translate-x-0 md:static
-        ${open ? "translate-x-0" : "-translate-x-full"}
-    `}>
+    fixed top-0 left-0 h-full w-64 bg-white shadow-md p-0
+    flex flex-col gap-3
+    transform transition-transform duration-300
+    z-[150]
+    md:sticky md:top-0 md:h-screen
+    md:translate-x-0
+    ${open ? "translate-x-0" : "-translate-x-full"}`}
+            >
 
 
                 {/* Profile */}

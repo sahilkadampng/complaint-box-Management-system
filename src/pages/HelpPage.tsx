@@ -44,7 +44,7 @@ export default function HelpPage() {
                 ============================ */}
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
                         <div>
-                            <h1 className="text-2xl font-bold mb-1 text-black mb-3 mt-10">Help Center</h1>
+                            <h1 className="text-2xl font-bold mb-1 text-black mt-10">Help Center</h1>
                             <p className="text-black text-sm md:text-base">Documentation • FAQs • Troubleshooting • System Guide</p>
                         </div>
 
@@ -114,7 +114,7 @@ export default function HelpPage() {
 
                         <Accordion type="multiple" className="space-y-3">
 
-                            <AccordionItem value="workflow" className="border rounded-lg px-4 bg-white rounded-md">
+                            <AccordionItem value="workflow" className="border px-4 bg-white rounded-md">
                                 <AccordionTrigger className="py-4">
                                     Complaint Workflow Explained
                                 </AccordionTrigger>
