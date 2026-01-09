@@ -54,7 +54,7 @@ const Sidebar: React.FC = () => {
                     className="flex flex-col bg-gradient-to-r from-[#0099b5] to-[#00bcd4] items-center mb-1 mt-[4rem] cursor-pointer group"
                     onClick={() => navigate('/profile')}
                 >
-                    <Avatar className="h-20 w-20 ring-2 ring-primary/30 shadow mt-4">
+                    <Avatar className="h-20 w-20 ring-2 text-pink-500 shadow mt-4">
                         {user?.profilePicture ? (
                             <AvatarImage src={user.profilePicture} alt={user.name} />
                         ) : (
@@ -65,7 +65,7 @@ const Sidebar: React.FC = () => {
                     </Avatar>
 
                     <div className="flex items-center mt-2 space-x-2">
-                        <p className="font-semibold text-gray-700 group-hover:text-primary transition">
+                        <p className="font-semibold text-blue-500 group-hover:text-blue-600 transition">
                             {user?.name || "User"}
                         </p>
                         <img
@@ -75,7 +75,7 @@ const Sidebar: React.FC = () => {
                         />
                     </div>
 
-                    <p className="text-xs text-gray-500 mb-4">{user?.email || "user@dpu.edu"}</p>
+                    <p className="text-xs text-gray-600 mb-4">{user?.email || "user@dpu.edu"}</p>
                 </div>
 
                 <hr className='mt-[-16px]' />

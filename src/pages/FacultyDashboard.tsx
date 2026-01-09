@@ -265,7 +265,7 @@ const FacultyDashboard: React.FC = () => {
                     <hr className="border-t border-gray-200 mt-[3px]" />
 
                     {/* Statistics + Filters + Table */}
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 bg-gray-100 min-h-screen rounded-md">
+                    <div className="max-w-7xl mx-auto px-2 sm:px-2 lg:px-4 py-6 bg-white min-h-screen rounded-md">
                         <h1 className="mb-4 font-vend text-xl font-bold text-black">Overview</h1>
                         {/* Statistics Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
