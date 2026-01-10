@@ -1,12 +1,42 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useNotification } from '@/context/NotificationContext';
 
 interface FormProps {
     id?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    maxFiles?: number;
+    maxSizeMB?: number;
 }
 
-const FileUpload: React.FC<FormProps> = ({ id = 'file', onChange }) => {
+const FileUpload: React.FC<FormProps> = ({ id = 'file', onChange, maxFiles = 5, maxSizeMB = 10 }) => {
+    const { showError, showSuccess } = useNotification();
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        if (files.length > maxFiles) {
+            showError(`You can upload up to ${maxFiles} files.`);
+            // Clear the input
+            (e.target as HTMLInputElement).value = '';
+            return;
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            if (f.size > maxSizeMB * 1024 * 1024) {
+                showError(`${f.name} exceeds the ${maxSizeMB}MB limit.`);
+                (e.target as HTMLInputElement).value = '';
+                return;
+            }
+        }
+
+        // If all validations pass, forward the event
+        if (onChange) onChange(e);
+        else showSuccess('Files selected');
+    };
+
     return (
         <StyledWrapper>
             <label htmlFor={id} className="custum-file-upload">
@@ -20,10 +50,16 @@ const FileUpload: React.FC<FormProps> = ({ id = 'file', onChange }) => {
                     </div>
                     <p className="text-sm text-gray-600 mb-2">Upload supporting documents (images, PDFs, Word docs)</p>
                     <p className="text-xs text-gray-500 mb-8">
-                        Max 3 files, 5MB each. Supported: JPG, PNG, GIF, PDF, TXT, DOC, DOCX
+                        Max {maxFiles} files, {maxSizeMB}MB each. Supported: JPG, PNG, GIF, PDF, TXT, DOC, DOCX
                     </p>
                 </div>
-                <input id={id} type="file" accept="image/*,application/pdf" onChange={onChange} />
+                <input
+                    id={id}
+                    type="file"
+                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                    onChange={handleFileChange}
+                    multiple
+                />
             </label>
         </StyledWrapper>
     );

@@ -45,36 +45,8 @@ const Login: React.FC = () => {
         setIsLoading(true);
 
         try {
-            // Get users from localStorage
-            const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-            //  Find user by username + password + role (IMPORTANT)
-            const user = users.find(
-                (u: any) =>
-                    u.username === formData.username.trim() &&
-                    u.password === formData.password &&
-                    u.role === selectedRole
-            );
-
-            if (!user) {
-                addNotification({
-                    type: 'error',
-                    message: 'Invalid username or password'
-                });
-                return;
-            }
-
-            //  Role restriction check
-            // if (user.role !== selectedRole) {
-            //     addNotification({
-            //         type: 'error',
-            //         message: `Account is registered as ${user.role}`
-            //     });
-            //     return;
-            // }
-
-            // If all good → log in
-            const success = login(formData.username.trim(), formData.password, selectedRole);
+            // Use API login
+            const success = await login(formData.username.trim(), formData.password, selectedRole);
 
             if (success) {
                 addNotification({
@@ -85,7 +57,7 @@ const Login: React.FC = () => {
             } else {
                 addNotification({
                     type: 'error',
-                    message: 'Login failed. Please try again.'
+                    message: 'Invalid username or password'
                 });
             }
         } catch (error) {

@@ -133,41 +133,35 @@ const Signup: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const success = signup({
+            const result = await signup({
                 name: formData.name.trim(),
                 email: formData.email.trim(),
                 username: formData.username.trim(),
                 password: formData.password,
-                role: selectedRole,
+                role: selectedRole!,
                 department: formData.department,
                 yearOfStudy: formData.yearOfStudy,
                 studentId: formData.studentId,
                 rollNumber: formData.rollNumber,
-                phoneNumber: formData.phoneNumber
+                phoneNumber: formData.phoneNumber,
+                program: formData.program
             });
-            if (success) {
-                //Store user in localStorage so Profile.tsx can validate password
-                // const newUser = {
-                //     name: formData.name.trim(),
-                //     email: formData.email.trim(),
-                //     username: formData.username.trim(),
-                //     password: formData.password,   // save password here
-                //     role: selectedRole
-                // };
-                // localStorage.setItem("user", JSON.stringify(newUser));
-
+            if (result.success) {
                 addNotification({
                     type: 'success',
-                    message: 'Account created successfully! Please log in.'
+                    message: 'Account created successfully! Redirecting...'
                 });
-                navigate('/login');
+                setTimeout(() => {
+                    navigate(selectedRole === 'student' ? '/student-dashboard' : '/faculty-dashboard');
+                }, 1000);
             } else {
                 addNotification({
-                    type: 'warning',
-                    message: ' Username already taken'
+                    type: 'error',
+                    message: result.error || 'Signup failed. Please check your information and try again.'
                 });
             }
         } catch (error) {
+            console.error('Signup error:', error);
             addNotification({
                 type: 'error',
                 message: 'Signup failed. Please try again.'

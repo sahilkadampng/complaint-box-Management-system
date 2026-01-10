@@ -75,7 +75,7 @@ const RegisterUserPage: React.FC = () => {
         setIsLoading(true);
 
         try {
-            const success = signup({
+            const result = await signup({
                 name: formData.name.trim(),
                 email: formData.email.trim(),
                 username: formData.username.trim(),
@@ -89,7 +89,7 @@ const RegisterUserPage: React.FC = () => {
                 yearOfStudy: formData.yearOfStudy,
             });
 
-            if (success) {
+            if (result.success) {
                 addNotification({ type: "success", message: "Account created successfully!" });
 
                 setFormData({
@@ -109,7 +109,7 @@ const RegisterUserPage: React.FC = () => {
             } else {
                 addNotification({
                     type: 'warning',
-                    message: 'Username already taken for this role.'
+                    message: result.error || 'Username already taken for this role.'
                 });
             }
         }

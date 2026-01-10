@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
-import ComplaintForm, { type Complaint, type ComplaintStatus } from '@/components/ComplaintForm';
+import ComplaintForm, { type Complaint } from '@/components/ComplaintForm';
 import ComplaintList from '@/components/ComplaintList';
 // import Navbar from '@/components/Navbar';
 import StudentSidebar from '@/components/StudentSidebar';
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import jsPDF from "jspdf";
 import { PlusCircle, FileText, BarChart3 } from 'lucide-react';
 import logo from '@/assets/DYPDPUUnitechsocietylogo1.png' // adjust path
+import { apiClient } from '@/lib/api';
 
 // === Illustrations (add your images to src/assets/) ===
 // ======================================================
@@ -38,82 +39,123 @@ const StudentDashboard: React.FC = () => {
     const [showSuccess, setShowSuccess] = useState(false);
 
     // normalize legacy data (old "pending"/"resolved", no history)
-    const normalize = (c: any): Complaint => {
-        const created = c.createdAt ?? new Date().toISOString();
-        let status: ComplaintStatus;
-        if (c.status === 'pending') status = 'in_review';
-        else if (c.status === 'resolved') status = 'resolved';
-        else if (['submitted', 'in_review', 'assigned', 'resolved'].includes(c.status)) status = c.status;
-        else status = 'submitted';
-
-        const history: any[] = Array.isArray(c.history) && c.history.length > 0
-            ? c.history
-            : [{ status: 'submitted', date: created }];
-
-        if (!history.find(h => h.status === status)) {
-            history.push({ status, date: created });
-        }
+    const normalizeComplaint = (apiComplaint: any): Complaint => {
+        const created = apiComplaint.createdAt || new Date().toISOString();
+        const history = Array.isArray(apiComplaint.history) && apiComplaint.history.length > 0
+            ? apiComplaint.history.map((h: any) => ({
+                status: h.status,
+                date: h.date || created,
+            }))
+            : [{ status: apiComplaint.status || 'submitted', date: created }];
 
         return {
-            ...c,
+            id: apiComplaint._id || apiComplaint.id,
+            title: apiComplaint.title,
+            description: apiComplaint.description,
+            category: apiComplaint.category,
+            studentId: typeof apiComplaint.studentId === 'object'
+                ? apiComplaint.studentId._id || apiComplaint.studentId.id
+                : apiComplaint.studentId,
+            studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
+            studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
             createdAt: created,
-            status,
+            status: apiComplaint.status || 'submitted',
             history,
-        } as Complaint;
+            attachment: apiComplaint.attachment || '',
+            department: apiComplaint.department || '',
+            yearOfStudy: apiComplaint.yearOfStudy || '',
+        };
     };
 
     // Load complaints from localStorage on component mount
     useEffect(() => {
-        const savedComplaints = localStorage.getItem('complaints');
-        if (savedComplaints) {
-            const allComplaints: Complaint[] = JSON.parse(savedComplaints).map(normalize);
-            const userComplaints = allComplaints.filter(c => c.studentId === user?.id);
-            setComplaints(userComplaints);
-        }
+        const loadComplaints = async () => {
+            if (!user?.id) {
+                return;
+            }
+
+            try {
+                const response = await apiClient.getComplaints();
+
+                if (response.error) {
+                    addNotification?.({ type: 'error', message: response.error });
+                    setComplaints([]);
+                } else if (response.data) {
+                    const normalizedComplaints = response.data.complaints.map(normalizeComplaint);
+                    setComplaints(normalizedComplaints);
+                }
+            } catch (error) {
+                console.error('Error loading complaints:', error);
+                addNotification?.({ type: 'error', message: 'Failed to load complaints' });
+            }
+        };
+
+        loadComplaints();
     }, [user?.id]);
 
-    const saveComplaintsToStorage = (updatedComplaints: Complaint[]) => {
-        const savedComplaints = localStorage.getItem('complaints');
-        const allComplaints: Complaint[] = savedComplaints ? JSON.parse(savedComplaints).map(normalize) : [];
+    const handleComplaintSubmit = async (complaint: Complaint) => {
+        try {
+            if (editingComplaint) {
+                // Update existing complaint
+                const response = await apiClient.updateComplaint(complaint.id, {
+                    title: complaint.title,
+                    description: complaint.description,
+                    category: complaint.category,
+                    attachment: complaint.attachment,
+                });
 
-        // Remove old complaints by current user and add updated ones
-        const otherUsersComplaints = allComplaints.filter(c => c.studentId !== user?.id);
-        const newAllComplaints = [...otherUsersComplaints, ...updatedComplaints];
+                if (response.error) {
+                    addNotification?.({ type: 'error', message: response.error });
+                    return;
+                }
 
-        localStorage.setItem('complaints', JSON.stringify(newAllComplaints));
-    };
+                if (response.data) {
+                    const updated = normalizeComplaint(response.data.complaint);
+                    setComplaints(prev => prev.map(c => c.id === updated.id ? updated : c));
+                    setEditingComplaint(null);
+                    addNotification?.({ type: 'success', message: 'Complaint updated successfully!' });
+                }
+            } else {
+                // Create new complaint
+                const response = await apiClient.createComplaint({
+                    title: complaint.title,
+                    description: complaint.description,
+                    category: complaint.category,
+                    attachment: complaint.attachment,
+                    department: complaint.department,
+                    yearOfStudy: complaint.yearOfStudy,
+                });
 
-    const handleComplaintSubmit = (complaint: Complaint) => {
-        let updatedComplaints: Complaint[];
+                if (response.error) {
+                    addNotification?.({ type: 'error', message: response.error });
+                    return;
+                }
 
-        if (editingComplaint) {
-            // Update existing complaint
-            updatedComplaints = complaints.map(c => (c.id === complaint.id ? complaint : c));
-            setEditingComplaint(null);
-        } else {
-            // Add new complaint
-            updatedComplaints = [...complaints, complaint];
+                if (response.data) {
+                    const newComplaint = normalizeComplaint(response.data.complaint);
+                    setComplaints(prev => [...prev, newComplaint]);
+
+                    addNotification?.({
+                        type: 'success',
+                        message: 'Complaint submitted successfully!',
+                    });
+
+                    // Success popup data
+                    const now = new Date();
+                    setLastSubmitted({
+                        ...newComplaint,
+                        date: now.toLocaleDateString('en-GB'),
+                        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    });
+
+                    setShowSuccess(true);
+                    setActiveTab('submit');
+                }
+            }
+        } catch (error) {
+            console.error('Error submitting complaint:', error);
+            addNotification?.({ type: 'error', message: 'Failed to save complaint' });
         }
-
-        setComplaints(updatedComplaints);
-        saveComplaintsToStorage(updatedComplaints);
-
-        // Success notification
-        addNotification?.({
-            type: 'success',
-            message: 'Complaint submitted successfully!',
-        });
-
-        // Success popup data
-        const now = new Date();
-        setLastSubmitted({
-            ...complaint,
-            date: now.toLocaleDateString('en-GB'), // dd/mm/yyyy
-            time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        });
-
-        setShowSuccess(true);
-        setActiveTab('submit');
     };
 
     const handleComplaintEdit = (complaint: Complaint) => {
@@ -534,7 +576,6 @@ Thank you for helping us improve our institution and services. Your involvement 
                                                 setTimeout(() => {
                                                     const updated = complaints.filter(c => c.id !== id);
                                                     setComplaints(updated);
-                                                    saveComplaintsToStorage(updated);
                                                 }, 0);
                                             }}
                                             className="w-full px-4 py-2 rounded-md bg-red-500 text-white font-semibold"

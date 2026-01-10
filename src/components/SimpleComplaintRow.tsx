@@ -59,8 +59,8 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
             "
         >
             {/* ID */}
-            <span className="font-medium md:font-normal text-sm md:text-base">
-                {complaint.id}
+            <span className="font-medium md:font-normal text-sm md:text-base" title={complaint.id}>
+                {complaint.id ? `${complaint.id.slice(0, 12)}...` : '—'}
             </span>
 
             {/* TITLE */}

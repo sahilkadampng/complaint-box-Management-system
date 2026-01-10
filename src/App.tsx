@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import { LoaderProvider } from "@/context/LoaderContext";
 import Settings from "./pages/setting";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import StudentAnalyticsPage from "./pages/StudentAnalyticsPage";
 import HelpPage from "./pages/HelpPage";
 import ReportsPage from "./pages/ReportsPage";
 import ComplaintDetails from "./pages/ComplaintDetails";
@@ -129,6 +130,12 @@ const App = () => {
                                             <Route path="/AnalyticsPage" element={
                                                 <ProtectedRoute>
                                                     <AnalyticsPage />
+                                                </ProtectedRoute>
+                                            } />
+
+                                            <Route path="/student-analytics" element={
+                                                <ProtectedRoute requireRole>
+                                                    <StudentAnalyticsPage />
                                                 </ProtectedRoute>
                                             } />
                                             <Route path="/profile" element={

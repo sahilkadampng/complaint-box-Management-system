@@ -8,6 +8,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useNavigate } from "react-router-dom";
 import FacultyLayout from "@/components/FacultyLayout";
+import { apiClient } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 
 interface User {
     name: string;
@@ -27,25 +29,38 @@ interface Student extends User {
 
 const ViewStudentsPage: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [students, setStudents] = useState<Student[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        const allUsers: User[] = JSON.parse(localStorage.getItem("users") || "[]");
-        const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+        (async () => {
+            try {
+                const studentsRes = await apiClient.getUsers({ role: 'student', limit: 1000 });
+                const facultyRes = await apiClient.getUsers({ role: 'faculty', limit: 1000 });
 
-        const facultyStudents = allUsers.filter(u => u.role === "student");
+                if (studentsRes.error) {
+                    console.error('Failed to load students:', studentsRes.error);
+                    return;
+                }
 
-        const studentsWithFacultyName: Student[] = facultyStudents.map(s => {
-            const faculty = allUsers.find(u => u.username === s.createdBy && u.role === "faculty");
-            return {
-                ...s,
-                createdByName: faculty?.name || currentUser?.name || "Admin",
-            };
-        });
+                const studentsData = studentsRes.data?.users || [];
+                const facultyData = facultyRes.data?.users || [];
 
-        setStudents(studentsWithFacultyName);
-    }, []);
+                const studentsWithFacultyName: Student[] = studentsData.map((s: any) => {
+                    const faculty = facultyData.find((f: any) => f.username === s.createdBy && f.role === 'faculty');
+                    return {
+                        ...s,
+                        createdByName: faculty?.name || (user?.name ?? 'Admin'),
+                    } as Student;
+                });
+
+                setStudents(studentsWithFacultyName);
+            } catch (err) {
+                console.error('Error loading students:', err);
+            }
+        })();
+    }, [user]);
 
     const filteredStudents = students.filter(
         s =>
@@ -134,7 +149,7 @@ const ViewStudentsPage: React.FC = () => {
                                 placeholder="Search students..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                className="w-64 md:w-64 w-full"
+                                className="w-full md:w-64"
                             />
                             <Button
                                 onClick={handleDownloadPDF}

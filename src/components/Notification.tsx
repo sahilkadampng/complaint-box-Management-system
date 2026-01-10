@@ -24,7 +24,7 @@ const Notification: React.FC = () => {
     const getStyles = (type: string) => {
         switch (type) {
             case "success":
-                return "border-success bg-success/40 text-black";
+                return "border-success bg-success/70 text-black";
             case "error":
                 return "border-destructive bg-destructive/40 text-black";
             case "warning":
@@ -36,7 +36,7 @@ const Notification: React.FC = () => {
 
     return (
         <div className="font-vend">
-            <div className="fixed top-16 right-4 z-[9999] space-y-2 w-[90%] max-w-sm sm:w-full">
+            <div className="fixed top-[41rem] right-4 z-[9999] space-y-2 w-[90%] max-w-sm sm:w-full">
                 {notifications.map((notification) => (
                     <div
                         key={notification.id}
@@ -45,11 +45,11 @@ const Notification: React.FC = () => {
                         )}`}
                     >
                         {/* Icon */}
-                        <div className="flex-shrink-0 mr-3 mt-1">{getIcon(notification.type)}</div>
+                        <div className="flex-shrink-0 mr-3 mt-2">{getIcon(notification.type)}</div>
 
                         {/* Message */}
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium break-words mt-1">
+                            <p className="text-sm font-medium break-words mt-2">
                                 {notification.message}
                             </p>
                         </div>

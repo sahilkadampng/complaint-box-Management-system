@@ -30,6 +30,7 @@ import {
 //     BarChart3,
 // } from "lucide-react";
 
+import { apiClient } from "@/lib/api";
 import type { Complaint } from "@/components/ComplaintForm";
 
 export default function ReportsPage() {
@@ -38,14 +39,64 @@ export default function ReportsPage() {
     // Load Complaints (SAME AS FACULTY DASHBOARD)
     const [complaints, setComplaints] = useState<Complaint[]>([]);
     const [filtered, setFiltered] = useState<Complaint[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Normalize API complaint to frontend format (same logic as other pages)
+    const normalizeComplaint = (apiComplaint: any): Complaint => {
+        const created = apiComplaint.createdAt || new Date().toISOString();
+        const history = Array.isArray(apiComplaint.history) && apiComplaint.history.length > 0
+            ? apiComplaint.history.map((h: any) => ({
+                status: h.status,
+                date: h.date || created,
+            }))
+            : [{ status: apiComplaint.status || 'submitted', date: created }];
+
+        return {
+            id: apiComplaint._id || apiComplaint.id,
+            title: apiComplaint.title,
+            description: apiComplaint.description,
+            category: apiComplaint.category,
+            studentId: typeof apiComplaint.studentId === 'object'
+                ? apiComplaint.studentId._id || apiComplaint.studentId.id
+                : apiComplaint.studentId,
+            studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
+            studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
+            createdAt: created,
+            status: apiComplaint.status || 'submitted',
+            history,
+            attachment: apiComplaint.attachment || '',
+            department: apiComplaint.department || '',
+            yearOfStudy: apiComplaint.yearOfStudy || '',
+        };
+    };
 
     useEffect(() => {
-        const saved = localStorage.getItem("complaints");
-        if (saved) {
-            const data = JSON.parse(saved);
-            setComplaints(data);
-            setFiltered(data);
-        }
+        const loadComplaints = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await apiClient.getComplaints({ limit: 1000 });
+                if (response.error) {
+                    setError(response.error);
+                    setComplaints([]);
+                    setFiltered([]);
+                } else if (response.data) {
+                    const normalized = response.data.complaints.map(normalizeComplaint);
+                    setComplaints(normalized);
+                    setFiltered(normalized);
+                }
+            } catch (err) {
+                console.error('Failed to load complaints', err);
+                setError('Failed to load complaints');
+                setComplaints([]);
+                setFiltered([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadComplaints();
     }, []);
 
 
@@ -150,7 +201,7 @@ export default function ReportsPage() {
                         <div className="mt-8">
                             <Card className="shadow-card rounded-md">
                                 <CardHeader>
-                                    <CardTitle>Recent Complaints - latest 10</CardTitle>
+                                    <CardTitle>Recent Complaints - latest 100</CardTitle>
                                 </CardHeader>
 
                                 <CardContent>
@@ -168,23 +219,33 @@ export default function ReportsPage() {
                                             </thead>
 
                                             <tbody>
-                                                {filtered
-                                                    .slice()
-                                                    .sort((a, b) =>
-                                                        new Date(b.createdAt).getTime() -
-                                                        new Date(a.createdAt).getTime()
-                                                    )
-                                                    .slice(0, 10)
-                                                    .map((c) => (
-                                                        <tr key={c.id} className="border-t">
-                                                            <td className="px-4 py-3">{c.id}</td>
-                                                            <td className="px-4 py-3">{c.title}</td>
-                                                            <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
-                                                            <td className="px-4 py-3">{c.category}</td>
-                                                            <td className="px-4 py-3">{c.status}</td>
-                                                            <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
-                                                        </tr>
-                                                    ))}
+                                                {loading ? (
+                                                    <tr>
+                                                        <td colSpan={6} className="px-4 py-3">Loading complaints…</td>
+                                                    </tr>
+                                                ) : filtered.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={6} className="px-4 py-3">No complaints found</td>
+                                                    </tr>
+                                                ) : (
+                                                    filtered
+                                                        .slice()
+                                                        .sort((a, b) =>
+                                                            new Date(b.createdAt).getTime() -
+                                                            new Date(a.createdAt).getTime()
+                                                        )
+                                                        .slice(0, 100)
+                                                        .map((c) => (
+                                                            <tr key={c.id} className="border-t">
+                                                                <td className="px-4 py-3">{c.id}</td>
+                                                                <td className="px-4 py-3">{c.title}</td>
+                                                                <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
+                                                                <td className="px-4 py-3">{c.category}</td>
+                                                                <td className="px-4 py-3">{c.status}</td>
+                                                                <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
+                                                            </tr>
+                                                        ))
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>

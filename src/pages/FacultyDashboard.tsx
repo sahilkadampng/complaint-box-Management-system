@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useNotification } from '@/context/NotificationContext';;
 // import ComplaintList from '@/components/ComplaintList';
 import SimpleComplaintRow from '@/components/SimpleComplaintRow';
 import jsPDF from 'jspdf';
@@ -14,9 +15,11 @@ import FacultyLayout from "@/components/FacultyLayout";
 import Sidebar from '@/components/Sidebar';
 import { FileText, Filter, Download, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { Complaint, ComplaintStatus } from '@/components/ComplaintForm';
+import { apiClient } from '@/lib/api';
 
 const FacultyDashboard: React.FC = () => {
     const { user: _user } = useAuth();
+    const { addNotification } = useNotification();
     const navigate = useNavigate();
 
 
@@ -27,30 +30,54 @@ const FacultyDashboard: React.FC = () => {
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('newest');
 
-    // Normalize legacy data
-    const normalize = (c: any): Complaint => {
-        const created = c.createdAt ?? new Date().toISOString();
-        let status: ComplaintStatus;
-        if (c.status === 'pending') status = 'in_review';
-        else if (c.status === 'resolved') status = 'resolved';
-        else if (['submitted', 'in_review', 'assigned', 'resolved'].includes(c.status)) status = c.status;
-        else status = 'submitted';
+    // Normalize API complaint to frontend format
+    const normalizeComplaint = (apiComplaint: any): Complaint => {
+        const created = apiComplaint.createdAt || new Date().toISOString();
+        const history = Array.isArray(apiComplaint.history) && apiComplaint.history.length > 0
+            ? apiComplaint.history.map((h: any) => ({
+                status: h.status,
+                date: h.date || created,
+            }))
+            : [{ status: apiComplaint.status || 'submitted', date: created }];
 
-        const history: any[] = Array.isArray(c.history) && c.history.length > 0
-            ? c.history
-            : [{ status: 'submitted', date: created }];
-
-        if (!history.find(h => h.status === status)) history.push({ status, date: created });
-
-        return { ...c, createdAt: created, status, history } as Complaint;
+        return {
+            id: apiComplaint._id || apiComplaint.id,
+            title: apiComplaint.title,
+            description: apiComplaint.description,
+            category: apiComplaint.category,
+            studentId: typeof apiComplaint.studentId === 'object'
+                ? apiComplaint.studentId._id || apiComplaint.studentId.id
+                : apiComplaint.studentId,
+            studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
+            studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
+            createdAt: created,
+            status: apiComplaint.status || 'submitted',
+            history,
+            attachment: apiComplaint.attachment || '',
+            department: apiComplaint.department || '',
+            yearOfStudy: apiComplaint.yearOfStudy || '',
+        };
     };
 
     useEffect(() => {
-        const savedComplaints = localStorage.getItem('complaints');
-        if (savedComplaints) {
-            const allComplaints: Complaint[] = JSON.parse(savedComplaints).map(normalize);
-            setComplaints(allComplaints);
-        }
+        const loadComplaints = async () => {
+            try {
+                const response = await apiClient.getComplaints();
+
+                if (response.error) {
+                    addNotification?.({ type: 'error', message: response.error });
+                    setComplaints([]);
+                } else if (response.data) {
+                    const normalizedComplaints = response.data.complaints.map(normalizeComplaint);
+                    setComplaints(normalizedComplaints);
+                }
+            } catch (error) {
+                console.error('Error loading complaints:', error);
+                addNotification?.({ type: 'error', message: 'Failed to load complaints' });
+            }
+        };
+
+        loadComplaints();
     }, []);
 
     useEffect(() => {
@@ -81,24 +108,25 @@ const FacultyDashboard: React.FC = () => {
         setFilteredComplaints(filtered);
     }, [complaints, searchTerm, filterStatus, filterCategory, sortBy]);
 
-    const saveComplaintsToStorage = (updatedComplaints: Complaint[]) => {
-        localStorage.setItem('complaints', JSON.stringify(updatedComplaints));
-    };
+    const handleStatusChange = async (complaintId: string, newStatus: ComplaintStatus) => {
+        try {
+            const response = await apiClient.updateComplaintStatus(complaintId, newStatus);
 
-    const handleStatusChange = (complaintId: string, newStatus: ComplaintStatus) => {
-        const updatedComplaints = complaints.map(complaint =>
-            complaint.id === complaintId
-                ? {
-                    ...complaint,
-                    status: newStatus,
-                    history: [...complaint.history, { status: newStatus, date: new Date().toISOString() }]
-                }
-                : complaint
-        );
-        setComplaints(updatedComplaints);
-        saveComplaintsToStorage(updatedComplaints);
-    };
+            if (response.error) {
+                addNotification?.({ type: 'error', message: response.error });
+                return;
+            }
 
+            if (response.data) {
+                const updated = normalizeComplaint(response.data.complaint);
+                setComplaints(prev => prev.map(c => c.id === updated.id ? updated : c));
+                addNotification?.({ type: 'success', message: 'Complaint status updated successfully' });
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            addNotification?.({ type: 'error', message: 'Failed to update complaint status' });
+        }
+    };
     const handleRegisterUser = () => navigate('/register');
 
     const handleExport = () => {
@@ -215,24 +243,24 @@ const FacultyDashboard: React.FC = () => {
         setSortBy('newest');
     };
 
-    const checkEscalations = (complaints: Complaint[]): Complaint[] => {
-        const now = new Date();
-        return complaints.map(c => {
-            if (c.status !== "resolved" && c.status !== "escalated" &&
-                new Date(c.createdAt).getTime() < now.getTime() - 7 * 24 * 60 * 60 * 1000
-            ) {
-                return { ...c, status: "escalated" as ComplaintStatus, history: [...c.history, { status: "escalated" as ComplaintStatus, date: new Date().toISOString() }] };
-            }
-            return c;
-        });
-    };
+    // const checkEscalations = (complaints: Complaint[]): Complaint[] => {
+    //     const now = new Date();
+    //     return complaints.map(c => {
+    //         if (c.status !== "resolved" && c.status !== "escalated" &&
+    //             new Date(c.createdAt).getTime() < now.getTime() - 7 * 24 * 60 * 60 * 1000
+    //         ) {
+    //             return { ...c, status: "escalated" as ComplaintStatus, history: [...c.history, { status: "escalated" as ComplaintStatus, date: new Date().toISOString() }] };
+    //         }
+    //         return c;
+    //     });
+    // };
 
-    useEffect(() => {
-        const stored = JSON.parse(localStorage.getItem("complaints") || "[]") as Complaint[];
-        const checked = checkEscalations(stored);
-        setComplaints(checked);
-        localStorage.setItem("complaints", JSON.stringify(checked));
-    }, []);
+    // useEffect(() => {
+    //     const stored = JSON.parse(localStorage.getItem("complaints") || "[]") as Complaint[];
+    //     const checked = checkEscalations(stored);
+    //     setComplaints(checked);
+    //     localStorage.setItem("complaints", JSON.stringify(checked));
+    // }, []);
 
     return (
         <FacultyLayout>

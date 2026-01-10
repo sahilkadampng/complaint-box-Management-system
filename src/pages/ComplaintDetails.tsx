@@ -6,20 +6,86 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 // import { useNavigate } from "react-router-dom";
+import { apiClient } from "@/lib/api";
 import FacultyLayout from "@/components/FacultyLayout";
 
 export default function ComplaintDetails() {
     const { id } = useParams();
     const [complaint, setComplaint] = useState<Complaint | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const normalizeComplaint = (apiComplaint: any): Complaint => {
+        const created = apiComplaint.createdAt || new Date().toISOString();
+        const history = Array.isArray(apiComplaint.history) && apiComplaint.history.length > 0
+            ? apiComplaint.history.map((h: any) => ({
+                status: h.status,
+                date: h.date || created,
+            }))
+            : [{ status: apiComplaint.status || 'submitted', date: created }];
+
+        return {
+            id: apiComplaint._id || apiComplaint.id,
+            title: apiComplaint.title,
+            description: apiComplaint.description,
+            category: apiComplaint.category,
+            studentId: typeof apiComplaint.studentId === 'object'
+                ? apiComplaint.studentId._id || apiComplaint.studentId.id
+                : apiComplaint.studentId,
+            studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
+            studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
+            createdAt: created,
+            status: apiComplaint.status || 'submitted',
+            history,
+            attachment: apiComplaint.attachment || '',
+            department: apiComplaint.department || '',
+            yearOfStudy: apiComplaint.yearOfStudy || '',
+        };
+    };
 
     useEffect(() => {
-        const saved = localStorage.getItem("complaints");
-        if (saved) {
-            const all = JSON.parse(saved) as Complaint[];
-            const found = all.find((c) => c.id === id);
-            setComplaint(found || null);
-        }
+        if (!id) return;
+        const load = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await apiClient.getComplaint(id);
+                if (response.error) {
+                    setError(response.error);
+                    setComplaint(null);
+                } else if (response.data && response.data.complaint) {
+                    const normalized = normalizeComplaint(response.data.complaint);
+                    setComplaint(normalized);
+                } else {
+                    setComplaint(null);
+                }
+            } catch (err) {
+                console.error('Failed to load complaint', err);
+                setError('Failed to load complaint');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        load();
     }, [id]);
+
+    if (loading) {
+        return (
+            <div className="p-6 max-w-4xl mx-auto">
+                <h1 className="text-xl font-bold">Loading complaint…</h1>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-6 max-w-4xl mx-auto">
+                <h1 className="text-xl font-bold">Error</h1>
+                <p className="text-sm text-red-600">{error}</p>
+            </div>
+        );
+    }
 
     if (!complaint) {
         return (
@@ -56,7 +122,7 @@ export default function ComplaintDetails() {
 
                         {/* Title + Status */}
                         <div className="flex flex-col md:flex-row justify-between md:items-center gap-2">
-                            <h2 className="text-xl font-semibold break-words">
+                            <h2 className="text-sm break-words text-pink-500">
                                 {complaint.title}
                             </h2>
                             <Badge className="capitalize px-3 py-1 text-sm">

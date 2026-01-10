@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import { apiClient } from '@/lib/api';
 import {
     Card, CardContent, CardHeader, CardTitle, CardDescription
 } from '@/components/ui/card';
@@ -17,7 +18,7 @@ interface FormData {
     name: string;
     email: string;
     department: string;
-    year: string;
+    yearOfStudy: string;
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
@@ -28,22 +29,15 @@ const Profile: React.FC = () => {
     const { showSuccess, showError } = useNotification();
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Role-specific storage key
-    const storageKey = authUser?.role === 'faculty' ? 'facultyUser' : 'studentUser';
-
-    // Load user from localStorage
-    const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem(storageKey);
-        return storedUser ? JSON.parse(storedUser) : authUser || null;
-    });
+    // Use auth user from context as the source of truth; avoid storing full user in localStorage
+    const [user, setUser] = useState(authUser || null);
 
     const [formData, setFormData] = useState<FormData>({
         name: user?.name || '',
         email: user?.email || '',
         department: user?.department || '',
-        year: user?.year || '',
-        currentPassword: user?.password || '',
+        yearOfStudy: user?.yearOfStudy || '',
+        currentPassword: '',
         newPassword: '',
         confirmPassword: '',
     });
@@ -57,8 +51,9 @@ const Profile: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (user) localStorage.setItem(storageKey, JSON.stringify(user));
-    }, [user, storageKey]);
+        // Keep local 'user' in sync with auth context when it changes
+        if (authUser) setUser(authUser);
+    }, [authUser]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -90,7 +85,6 @@ const Profile: React.FC = () => {
 
             const updatedUser = { ...user, profilePicture: base64String };
             setUser(updatedUser);
-            localStorage.setItem(storageKey, JSON.stringify(updatedUser));
 
             try {
                 await updateUser({ profilePicture: base64String });
@@ -106,7 +100,6 @@ const Profile: React.FC = () => {
         if (!user) return;
         const updatedUser = { ...user, profilePicture: '' };
         setUser(updatedUser);
-        localStorage.setItem(storageKey, JSON.stringify(updatedUser));
 
         try {
             await updateUser({ profilePicture: '' });
@@ -132,8 +125,8 @@ const Profile: React.FC = () => {
                     setIsLoading(false);
                     return;
                 }
-                if (!formData.currentPassword || formData.currentPassword !== user?.password) {
-                    showError('Current password is incorrect');
+                if (!formData.currentPassword) {
+                    showError('Please enter your current password');
                     setIsLoading(false);
                     return;
                 }
@@ -144,16 +137,23 @@ const Profile: React.FC = () => {
                 email: formData.email,
             };
 
-            if (user?.role === 'student') updateData.year = formData.year;
+            if (user?.role === 'student') updateData.yearOfStudy = formData.yearOfStudy;
             if (user?.role === 'faculty') updateData.department = formData.department;
 
-            if (formData.newPassword) updateData.password = formData.newPassword;
+            // If password change requested, call change-password endpoint
+            if (formData.newPassword) {
+                const pwdRes = await apiClient.changePassword(formData.currentPassword, formData.newPassword);
+                if (pwdRes.error) {
+                    showError(pwdRes.error);
+                    setIsLoading(false);
+                    return;
+                }
+            }
 
             await updateUser(updateData);
 
             const updatedUser = { ...user, ...updateData };
             setUser(updatedUser);
-            localStorage.setItem(storageKey, JSON.stringify(updatedUser));
 
             showSuccess(formData.newPassword ? 'Password changed successfully!' : 'Profile updated successfully!');
 
@@ -265,8 +265,8 @@ const Profile: React.FC = () => {
 
                                     {user.role === 'student' && (
                                         <div className="space-y-2">
-                                            <Label htmlFor="year">Academic Year</Label>
-                                            <Input id="year" name="year" value={formData.year} onChange={handleInputChange} />
+                                            <Label htmlFor="yearOfStudy">Academic Year</Label>
+                                            <Input id="yearOfStudy" name="yearOfStudy" value={formData.yearOfStudy} onChange={handleInputChange} />
                                         </div>
                                     )}
 

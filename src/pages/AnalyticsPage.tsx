@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FileText, CheckCircle, AlertTriangle, Download } from "lucide-react";
 import Breadcrumb from "@/components/Breadcrumb";
+import { apiClient } from '@/lib/api';
 import {
     ResponsiveContainer,
     PieChart,
@@ -37,27 +38,39 @@ const AnalyticsPage: React.FC = () => {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem("complaints") || "[]");
-        // normalize some older shapes defensively
-        const normalized: Complaint[] = (saved || []).map((c: any) => {
-            const createdAt = c.createdAt ?? new Date().toISOString();
-            const history = Array.isArray(c.history) && c.history.length ? c.history : [{ status: c.status ?? "submitted", date: createdAt }];
-            const status =
-                c.status === "pending" ? "in_review" : ["submitted", "in_review", "assigned", "resolved", "escalated"].includes(c.status) ? c.status : "submitted";
+        (async () => {
+            try {
+                const res = await apiClient.getComplaints({ limit: 1000 });
+                if (res.error) {
+                    console.error('Failed to fetch complaints for analytics:', res.error);
+                    setComplaints([]);
+                    return;
+                }
 
-            return {
-                ...c,
-                createdAt,
-                history,
-                status,
-                category: c.category ?? "Uncategorized",
-                department: c.department ?? "Unknown",
-                yearOfStudy: c.yearOfStudy ?? "Unknown",
-                studentName: c.studentName ?? c.studentId ?? "Unknown",
-            } as Complaint;
-        });
+                const raw = res.data?.complaints || [];
+                const normalized: Complaint[] = raw.map((c: any) => {
+                    const createdAt = c.createdAt ?? new Date().toISOString();
+                    const history = Array.isArray(c.history) && c.history.length ? c.history : [{ status: c.status ?? 'submitted', date: createdAt }];
+                    const status = c.status === 'pending' ? 'in_review' : ['submitted', 'in_review', 'assigned', 'resolved', 'escalated'].includes(c.status) ? c.status : 'submitted';
 
-        setComplaints(normalized);
+                    return {
+                        ...c,
+                        createdAt,
+                        history,
+                        status,
+                        category: c.category ?? 'Uncategorized',
+                        department: c.department ?? 'Unknown',
+                        yearOfStudy: c.yearOfStudy ?? 'Unknown',
+                        studentName: c.studentName ?? (c.studentId?.name || c.studentId || 'Unknown'),
+                    } as Complaint;
+                });
+
+                setComplaints(normalized);
+            } catch (err) {
+                console.error('Error loading analytics complaints:', err);
+                setComplaints([]);
+            }
+        })();
     }, []);
 
     // ---------------- BASIC STATS ----------------
@@ -400,16 +413,19 @@ const AnalyticsPage: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filtered.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 1000).map((c) => (
-                                                <tr key={c.id} className="border-t">
-                                                    <td className="px-4 py-3">{c.id}</td>
-                                                    <td className="px-4 py-3">{c.title}</td>
-                                                    <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
-                                                    <td className="px-4 py-3">{c.category}</td>
-                                                    <td className="px-4 py-3">{c.status}</td>
-                                                    <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
-                                                </tr>
-                                            ))}
+                                            {filtered.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 1000).map((c) => {
+                                                const cid = ((c as any)?._id) ?? (c as any).id ?? '-';
+                                                return (
+                                                    <tr key={cid} className="border-t">
+                                                        <td className="px-4 py-3">{cid}</td>
+                                                        <td className="px-4 py-3">{c.title}</td>
+                                                        <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
+                                                        <td className="px-4 py-3">{c.category}</td>
+                                                        <td className="px-4 py-3">{c.status}</td>
+                                                        <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>
