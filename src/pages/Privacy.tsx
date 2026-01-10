@@ -3,7 +3,7 @@ import LegalLayout from "../components/LegalLayout";
 export default function Privacy() {
     return (
         <LegalLayout title="Privacy Policy" updated="January 2026">
-            <section>
+            <section className="font-body">
                 <h2 className="text-xl font-medium text-slate-900">
                     1. Information We Collect
                 </h2>
@@ -13,7 +13,7 @@ export default function Privacy() {
                 </p>
             </section>
 
-            <section>
+            <section className="font-body">
                 <h2 className="text-xl font-medium text-slate-900">
                     2. How We Use Information
                 </h2>
@@ -23,7 +23,7 @@ export default function Privacy() {
                 </p>
             </section>
 
-            <section>
+            <section className="font-body">
                 <h2 className="text-xl font-medium text-slate-900">
                     3. Data Protection
                 </h2>
@@ -33,7 +33,7 @@ export default function Privacy() {
                 </p>
             </section>
 
-            <section>
+            <section className="font-body">
                 <h2 className="text-xl font-medium text-slate-900">
                     4. Cookies
                 </h2>
@@ -42,7 +42,7 @@ export default function Privacy() {
                 </p>
             </section>
 
-            <section>
+            <section className="font-body">
                 <h2 className="text-xl font-medium text-slate-900">
                     5. Contact
                 </h2>

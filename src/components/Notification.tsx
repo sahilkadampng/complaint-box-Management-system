@@ -35,7 +35,7 @@ const Notification: React.FC = () => {
     };
 
     return (
-        <div className="font-vend">
+        <div className="font-body">
             <div className="fixed top-[41rem] right-4 z-[9999] space-y-2 w-[90%] max-w-sm sm:w-full">
                 {notifications.map((notification) => (
                     <div

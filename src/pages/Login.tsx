@@ -78,7 +78,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="font-vend">
+        <div className="font-body">
             <div className="min-h-screen flex items-center justify-center bg-gradient-secondary p-4 relative">
                 {/* Left Side Image */}
                 {/* Left Side Image at Bottom */}

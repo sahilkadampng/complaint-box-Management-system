@@ -38,7 +38,7 @@ const Sidebar: React.FC = () => {
         <>
 
             {/* Sidebar Drawer */}
-            <div className={`
+            <div className={`font-body
     fixed top-0 left-0 h-full w-64 bg-white shadow-md p-0
     flex flex-col gap-3
     transform transition-transform duration-300

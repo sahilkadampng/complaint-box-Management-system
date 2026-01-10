@@ -123,7 +123,7 @@ const RegisterUserPage: React.FC = () => {
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex w-full">
+            <div className="font-body flex w-full">
                 <Sidebar />
 
                 <div className="max-w-2xl mx-auto px-6 py-8">

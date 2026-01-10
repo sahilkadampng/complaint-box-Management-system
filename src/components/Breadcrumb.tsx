@@ -8,7 +8,7 @@ interface BreadcrumbProps {
 export default function Breadcrumb({ current }: BreadcrumbProps) {
     const navigate = useNavigate();
     return (
-        <div className="text-sm text-gray-500 flex items-center gap-2 mb-6 mt-2">
+        <div className="text-sm text-gray-500 flex items-center gap-2 mb-6 mt-2 font-body">
             {/* Home (Dashboard) */}
             <span
                 onClick={() => navigate("/faculty-dashboard")}

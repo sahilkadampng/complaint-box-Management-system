@@ -33,7 +33,7 @@ export default function HelpPage() {
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex w-full">
+            <div className="font-body flex w-full">
                 {/* SIDEBAR */}
                 <Sidebar />
                 {/* MAIN AREA */}

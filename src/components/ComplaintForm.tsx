@@ -166,7 +166,7 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({ complaint, onSubmit, onCa
     };
 
     return (
-        <Card className="shadow-card rounded-md font-vend">
+        <Card className="shadow-card rounded-md font-body">
             <CardHeader>
                 <CardTitle>{complaint ? 'Edit Complaint' : 'Submit New Complaint'}</CardTitle>
             </CardHeader>

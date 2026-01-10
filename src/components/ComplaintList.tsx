@@ -124,7 +124,7 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 font-body">
             {/* Search and Filters */}
             <Card className="shadow-card">
                 <CardContent className="pt-6">

@@ -13,7 +13,7 @@ export default function LegalLayout({ title, updated, children }: Props) {
     }, [title]);
 
     return (
-        <div className="min-h-screen bg-slate-50 px-6 py-16">
+        <div className="min-h-screen bg-slate-50 px-6 py-16 font-body">
             <div className="mx-auto max-w-3xl">
                 <h1 className="text-3xl font-semibold text-slate-900">
                     {title}

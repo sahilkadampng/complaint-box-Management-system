@@ -88,7 +88,7 @@ const StudentAnalyticsPage: React.FC = () => {
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex w-full bg-gray-50 rounded-md">
+            <div className="font-body flex w-full bg-gray-50 rounded-md">
                 <StudentSidebar />
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-4">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-1 md:p-6">

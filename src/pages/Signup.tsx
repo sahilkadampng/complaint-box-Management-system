@@ -185,7 +185,7 @@ const Signup: React.FC = () => {
     });
 
     return (
-        <div className="font-vend">
+        <div className="font-body">
             <div className="min-h-screen relative bg-gradient-secondary">
                 <img
                     src={topLeftImg}

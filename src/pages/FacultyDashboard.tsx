@@ -264,7 +264,7 @@ const FacultyDashboard: React.FC = () => {
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex w-full">
+            <div className="font-body flex w-full">
 
                 {/*  */}
                 {/* <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-50"> */}
@@ -277,7 +277,7 @@ const FacultyDashboard: React.FC = () => {
                     <div className="bg-white text-primary-foreground">
                         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-8">
                             <div className="mb-4 md:mb-0">
-                                <h1 className="text-2xl font-bold mb-1 text-black mt-20">Faculty Dashboard</h1>
+                                <h1 className="text-3xl font-bold mb-1 font-body text-black mt-20">Faculty Dashboard</h1>
                                 <p className="text-black text-sm md:text-base">Manage and resolve student complaints efficiently</p>
                             </div>
                             <div className="flex flex-wrap gap-2 md:gap-4 mt-4">

@@ -180,7 +180,7 @@ const Profile: React.FC = () => {
     if (!user) return <div>Loading...</div>;
 
     return (
-        <div className="font-vend">
+        <div className="font-body">
             <div className="container mx-auto py-8 px-4 max-w-4xl">
                 <div className="mb-4">
                     <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">

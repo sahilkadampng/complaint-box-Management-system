@@ -55,7 +55,7 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
                 border-b cursor-pointer transition
                 hover:bg-gray-100 
                 px-4 py-3
-                grid grid-cols-1 md:grid-cols-6 gap-4
+                grid grid-cols-1 md:grid-cols-6 gap-4 font-body
             "
         >
             {/* ID */}

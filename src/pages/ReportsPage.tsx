@@ -124,7 +124,7 @@ export default function ReportsPage() {
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex w-full bg-gray-50">
+            <div className="font-body flex w-full bg-gray-50">
 
                 {/* SIDEBAR */}
                 <Sidebar />

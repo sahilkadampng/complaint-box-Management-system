@@ -296,7 +296,7 @@ Thank you for helping us improve our institution and services. Your involvement 
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex min-h-screen bg-background">
+            <div className="font-body flex min-h-screen bg-background">
                 {/* Sidebar */}
                 <StudentSidebar />
 

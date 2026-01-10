@@ -45,7 +45,7 @@ export default function HomePage() {
     // };
 
     return (
-        <div className="font-vend">
+        <div className="font-body">
             <div className="min-h-screen bg-background">
                 {/* Header */}
                 <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">

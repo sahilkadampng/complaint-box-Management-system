@@ -107,7 +107,7 @@ export default function ComplaintDetails() {
 
     return (
         <FacultyLayout>
-            <div className="max-w-4xl mx-auto p-6 space-y-6 font-vend rounded-md">
+            <div className="max-w-4xl mx-auto p-6 space-y-6 font-body rounded-md">
                 <Button className="bg-gray-100 hover:bg-gray-200 text-black shadow-sm mb-4 mt-20" onClick={() => window.history.back()}>
                     <ArrowLeft className="h-4 w-4 mr-2" /> Back
                 </Button>

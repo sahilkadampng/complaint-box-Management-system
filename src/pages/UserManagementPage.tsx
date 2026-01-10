@@ -160,7 +160,7 @@ export default function UserManagementPage() {
 
     return (
         <FacultyLayout>
-            <div className="font-vend flex w-full">
+            <div className="font-body flex w-full">
                 {/* Sidebar */}
                 <Sidebar />
 
