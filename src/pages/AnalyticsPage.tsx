@@ -31,7 +31,7 @@ import type { Complaint } from "@/components/ComplaintForm";
  * - Designed to match the complaint object used in your FacultyDashboard
  * - Fields used: title, description, category, studentId, studentName, createdAt, status, history, department, yearOfStudy
  */
-const COLORS = ["#3366cc", "#ff9900", "#dc3912", "#109618", "#990099", "#6a1b9a", "#00aaff"];
+const COLORS = ["#6B7280", "#ff9900", "#00aaff", "#109618", "#990099", "#6a1b9a", "#00aaff"];
 
 const AnalyticsPage: React.FC = () => {
     const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -73,7 +73,7 @@ const AnalyticsPage: React.FC = () => {
         })();
     }, []);
 
-    // ---------------- BASIC STATS ----------------
+    //BASIC STATS
     const stats = useMemo(() => {
         const total = complaints.length;
         const submitted = complaints.filter((c) => c.status === "submitted").length;
@@ -86,7 +86,7 @@ const AnalyticsPage: React.FC = () => {
         return { total, submitted, in_review, assigned, resolved, escalated, resolutionRate, students };
     }, [complaints]);
 
-    // ---------------- STATUS & CATEGORY DISTRIBUTIONS ----------------
+    //STATUS & CATEGORY DISTRIBUTIONS
     const statusData = useMemo(() => {
         return [
             { name: "Submitted", value: stats.submitted },
@@ -108,7 +108,7 @@ const AnalyticsPage: React.FC = () => {
             .sort((a, b) => b.value - a.value);
     }, [complaints]);
 
-    // ---------------- DEPARTMENT & YEAR ----------------
+    //DEPARTMENT & YEAR
     const departmentData = useMemo(() => {
         const map: Record<string, number> = {};
         complaints.forEach((c) => {
@@ -127,7 +127,7 @@ const AnalyticsPage: React.FC = () => {
         return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
     }, [complaints]);
 
-    // ---------------- TREND (daily) ----------------
+    //TREND (daily)
     const trendData = useMemo(() => {
         const map: Record<string, number> = {};
         complaints.forEach((c) => {
@@ -142,7 +142,7 @@ const AnalyticsPage: React.FC = () => {
             .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // chronological
     }, [complaints]);
 
-    // ---------------- AVERAGE RESOLUTION TIME ----------------
+    //AVERAGE RESOLUTION TIME
     const avgResolutionDays = useMemo(() => {
         const resolvedComplaints = complaints.filter((c) => c.status === "resolved");
         const diffs: number[] = [];
@@ -177,13 +177,13 @@ const AnalyticsPage: React.FC = () => {
     //         .slice(0, 8);
     // }, [complaints]);
 
-    // ---------------- ESCALATION RATIO ----------------
+    //ESCALATION RATIO
     const escalationRatio = useMemo(() => {
         if (!complaints.length) return 0;
         return Math.round((complaints.filter((c) => c.status === "escalated").length / complaints.length) * 100);
     }, [complaints]);
 
-    // ---------------- FILTERED COMPLAINTS FOR SEARCH (simple) ----------------
+    //FILTERED COMPLAINTS FOR SEARCH (simple)
     const filtered = useMemo(() => {
         if (!search.trim()) return complaints;
         const q = search.toLowerCase();
@@ -209,7 +209,7 @@ const AnalyticsPage: React.FC = () => {
     };
 
 
-    // ---------------- EXPORT PDF ----------------
+    //EXPORT PDF
     const exportPDF = () => {
         const doc = new jsPDF({ unit: "pt", format: "a4" });
         const now = new Date();
@@ -220,7 +220,7 @@ const AnalyticsPage: React.FC = () => {
         doc.setFontSize(10);
         doc.text(`Generated: ${now.toLocaleString()}`, 40, 56);
 
-        // ------------------- SUMMARY TABLE -------------------
+        //SUMMARY TABLE
         autoTable(doc, {
             startY: 72,
             head: [["Metric", "Value"]],
@@ -240,7 +240,7 @@ const AnalyticsPage: React.FC = () => {
         // Get last Y position safely
         const lastY = (doc as any).lastAutoTable.finalY || 180;
 
-        // ------------------- CATEGORIES TABLE -------------------
+        //CATEGORIES TABLE
         const catRows = categoriesData.slice(0, 20).map((c) => [c.name, c.value]);
 
         autoTable(doc, {
@@ -250,7 +250,7 @@ const AnalyticsPage: React.FC = () => {
             styles: { fontSize: 10 },
         });
 
-        // ---------------- SAVE PDF ----------------
+        //SAVE PDF
         doc.save(`analytics_${now.toISOString().slice(0, 10)}.pdf`);
     };
 

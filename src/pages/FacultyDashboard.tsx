@@ -390,10 +390,12 @@ const FacultyDashboard: React.FC = () => {
                                                     <SelectItem value="all">All Categories</SelectItem>
                                                     {categories.map((category) => (
                                                         <SelectItem key={category} value={category}>
-                                                            {category}
-                                                            <Badge variant="secondary" className="ml-2">
-                                                                {complaints.filter((c) => c.category === category).length}
-                                                            </Badge>
+                                                            <div className="flex w-full items-center gap-4">
+                                                                <span className="flex-1">{category}</span>
+                                                                <Badge className="ml-auto bg-blue-600 text-white border-none shadow-none">
+                                                                    {complaints.filter((c) => c.category === category).length}
+                                                                </Badge>
+                                                            </div>
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>

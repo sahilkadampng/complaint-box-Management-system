@@ -92,11 +92,11 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
                         </SelectTrigger>
 
                         <SelectContent>
-                            <SelectItem value="submitted">Submitted</SelectItem>
-                            <SelectItem value="in_review">In Review</SelectItem>
-                            <SelectItem value="assigned">Assigned</SelectItem>
-                            <SelectItem value="resolved">Resolved</SelectItem>
-                            <SelectItem value="escalated">Escalated</SelectItem>
+                            <SelectItem value="submitted"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-gray-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Submitted</p></div></SelectItem>
+                            <SelectItem value="in_review"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-amber-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">In Review</p></div></SelectItem>
+                            <SelectItem value="assigned"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-blue-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Assigned</p></div></SelectItem>
+                            <SelectItem value="resolved"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-green-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Resolved</p></div></SelectItem>
+                            <SelectItem value="escalated"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-red-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Escalated</p></div></SelectItem>
                         </SelectContent>
                     </Select>
                 ) : (
