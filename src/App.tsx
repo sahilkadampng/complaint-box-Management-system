@@ -94,11 +94,6 @@ const App = () => {
                                                     <Signup />
                                                 </PublicRoute>
                                             } />
-                                            <Route path="/register" element={
-                                                <ProtectedRoute>
-                                                    <RegisterUserPage />
-                                                </ProtectedRoute>
-                                            } />
                                             <Route path="/role-selection" element={
                                                 <ProtectedRoute>
                                                     <RoleSelection />
@@ -113,26 +108,31 @@ const App = () => {
                                                 <ProtectedRoute requireRole>
                                                     <FacultyDashboard />
                                                 </ProtectedRoute>
-                                            } />
-                                            <Route path="/view-students" element={<ViewStudentsPage />} />
-                                            <Route path="/view-faculty" element={<ViewFacultyPage />} />
-                                            <Route path="/help" element={<HelpPage />} />
-                                            <Route path="/ReportsPage" element={<ReportsPage />} />
-                                            <Route path="/complaint/:id" element={<ComplaintDetails />} />
-                                            <Route path="/UserManagementPage" element={<UserManagementPage />} />
-                                            <Route path="/terms" element={<Terms />} />
-                                            <Route path="/privacy" element={<Privacy />} />
-                                            <Route path="/settings" element={
-                                                <ProtectedRoute>
-                                                    <Settings />
-                                                </ProtectedRoute>
-                                            } />
-                                            <Route path="/AnalyticsPage" element={
-                                                <ProtectedRoute>
-                                                    <AnalyticsPage />
-                                                </ProtectedRoute>
-                                            } />
-
+                                            }>
+                                                <Route path="view-students" element={<ViewStudentsPage />} />
+                                                <Route path="view-faculty" element={<ViewFacultyPage />} />
+                                                <Route path="help" element={<HelpPage />} />
+                                                <Route path="ReportsPage" element={<ReportsPage />} />
+                                                <Route path="complaint/:id" element={<ComplaintDetails />} />
+                                                <Route path="UserManagementPage" element={<UserManagementPage />} />
+                                                <Route path="terms" element={<Terms />} />
+                                                <Route path="privacy" element={<Privacy />} />
+                                                <Route path="settings" element={
+                                                    <ProtectedRoute>
+                                                        <Settings />
+                                                    </ProtectedRoute>
+                                                } />
+                                                <Route path="register" element={
+                                                    <ProtectedRoute>
+                                                        <RegisterUserPage />
+                                                    </ProtectedRoute>
+                                                } />
+                                                <Route path="AnalyticsPage" element={
+                                                    <ProtectedRoute>
+                                                        <AnalyticsPage />
+                                                    </ProtectedRoute>
+                                                } />
+                                            </Route>
                                             <Route path="/student-analytics" element={
                                                 <ProtectedRoute requireRole>
                                                     <StudentAnalyticsPage />

@@ -87,10 +87,10 @@ const Signup: React.FC = () => {
         }
 
         if (selectedRole === 'faculty') {
-            if (!formData.name.trim() || !formData.email.trim() || !formData.username.trim() || !formData.password) {
+            if (!formData.name.trim() || !formData.email.trim() || !formData.username.trim() || !formData.password || !formData.department || !formData.program) {
                 addNotification({
                     type: 'error',
-                    message: 'Please fill in all student information fields'
+                    message: 'Please fill in all faculty information fields'
                 });
                 return;
             }
@@ -382,6 +382,53 @@ const Signup: React.FC = () => {
                                             </Card>
                                         </div>
                                     </div>
+
+                                    {/* Faculty Information */}
+                                    {selectedRole === 'faculty' && (
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-foreground mb-4">Faculty Information</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="department">Department <span className="text-red-500">*</span></Label>
+                                                    <Select
+                                                        value={formData.department}
+                                                        onValueChange={(value) => {
+                                                            handleInputChange('department', value);
+                                                            handleInputChange('program', '');
+                                                        }}
+                                                    >
+                                                        <SelectTrigger className="transition-all duration-200 focus:shadow-hover">
+                                                            <SelectValue placeholder="Select Department" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {Object.keys(departmentPrograms).map((dept) => (
+                                                                <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+
+                                                {formData.department && (
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="program">Program <span className="text-red-500">*</span></Label>
+                                                        <Select
+                                                            value={formData.program}
+                                                            onValueChange={(value) => handleInputChange('program', value)}
+                                                        >
+                                                            <SelectTrigger className="transition-all duration-200 focus:shadow-hover">
+                                                                <SelectValue placeholder="Select Program" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {departmentPrograms[formData.department].map((prog) => (
+                                                                    <SelectItem key={prog} value={prog}>{prog}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {/* Student Information */}
                                     {selectedRole === 'student' && (

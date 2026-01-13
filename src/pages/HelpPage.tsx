@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar";
+// import Sidebar from "@/components/Sidebar";
 import Breadcrumb from "@/components/Breadcrumb";
 import FacultyLayout from "@/components/FacultyLayout";
 import {
@@ -35,7 +35,7 @@ export default function HelpPage() {
         <FacultyLayout>
             <div className="font-body flex w-full">
                 {/* SIDEBAR */}
-                <Sidebar />
+                {/* <Sidebar /> */}
                 {/* MAIN AREA */}
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
 

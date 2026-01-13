@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotification } from "@/context/NotificationContext";
 import { apiClient } from "@/lib/api";
-import Sidebar from "@/components/Sidebar";
+// import Sidebar from "@/components/Sidebar";
 // import Navbar from "@/components/Navbar";
 import Breadcrumb from "@/components/Breadcrumb";
 import FacultyLayout from "@/components/FacultyLayout";
@@ -36,6 +36,12 @@ export default function SettingsPage() {
     const [showPwd, setShowPwd] = useState(false);
     const [showNewPwd, setShowNewPwd] = useState(false);
 
+    // Profile editing
+    const [profileName, setProfileName] = useState(user?.name || "");
+    const [profileDept, setProfileDept] = useState(user?.department || "");
+    const [profilePhone, setProfilePhone] = useState(user?.phoneNumber || "");
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
+
     // Notification prefs local state (sync with user)
     const [emailAlertsEnabled, setEmailAlertsEnabled] = useState<boolean>(user?.emailAlerts ?? true);
     const [systemMessagesEnabled, setSystemMessagesEnabled] = useState<boolean>(user?.systemMessages ?? true);
@@ -44,7 +50,32 @@ export default function SettingsPage() {
     useEffect(() => {
         setEmailAlertsEnabled(user?.emailAlerts ?? true);
         setSystemMessagesEnabled(user?.systemMessages ?? true);
+        setProfileName(user?.name || "");
+        setProfileDept(user?.department || "");
+        setProfilePhone(user?.phoneNumber || "");
     }, [user]);
+
+    const handleSaveProfile = async () => {
+        if (!profileName.trim()) {
+            addNotification?.({ type: 'error', message: 'Name is required' });
+            return;
+        }
+
+        setIsSavingProfile(true);
+        try {
+            await updateUser({
+                name: profileName.trim(),
+                department: profileDept.trim(),
+                phoneNumber: profilePhone.trim(),
+            });
+            addNotification?.({ type: 'success', message: 'Profile updated' });
+        } catch (err) {
+            console.error('Profile update failed', err);
+            addNotification?.({ type: 'error', message: 'Failed to update profile' });
+        } finally {
+            setIsSavingProfile(false);
+        }
+    };
 
     const handleToggleEmailAlerts = async (val: boolean) => {
         setEmailAlertsEnabled(val);
@@ -119,6 +150,22 @@ export default function SettingsPage() {
         }
     };
 
+    const handleExportData = () => {
+        if (!user) return;
+        const safeUser = {
+            ...user,
+            password: undefined,
+        };
+        const blob = new Blob([JSON.stringify(safeUser, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `user-profile-${user.username || 'me'}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        addNotification?.({ type: 'success', message: 'Profile data exported' });
+    };
+
     const handleDeleteAccount = async () => {
         if (!user) return;
         if (confirmInput !== user.username) {
@@ -153,13 +200,10 @@ export default function SettingsPage() {
         <FacultyLayout>
             <div className="font-body flex w-full">
                 {/* SIDEBAR */}
-                <Sidebar />
+                {/* <Sidebar /> */}
                 {/* MAIN AREA */}
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
-
-                    {/* ===========================
-                    TOP NAVBAR (same style as dashboard)
-                ============================ */}
+                    {/* TOP NAVBAR (same style as dashboard) */}
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
                         <div>
                             <h1 className="text-2xl font-bold mb-1 text-black mt-10">Settings</h1>
@@ -188,7 +232,8 @@ export default function SettingsPage() {
                                 <div>
                                     <label className="text-sm font-medium">Full Name</label>
                                     <Input
-                                        value={user?.name || ""}
+                                        value={profileName}
+                                        onChange={(e) => setProfileName(e.target.value)}
                                         className="mt-1"
                                     />
                                 </div>
@@ -211,7 +256,34 @@ export default function SettingsPage() {
                                     />
                                 </div>
 
-                                <Button className="mt-2">Save Changes</Button>
+                                <div>
+                                    <label className="text-sm font-medium">Department</label>
+                                    <Input
+                                        value={profileDept}
+                                        onChange={(e) => setProfileDept(e.target.value)}
+                                        className="mt-1"
+                                        placeholder="e.g., Computer Science"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium">Phone</label>
+                                    <Input
+                                        value={profilePhone}
+                                        onChange={(e) => setProfilePhone(e.target.value)}
+                                        className="mt-1"
+                                        placeholder="+91-XXXXXXXXXX"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3">
+                                    <Button className="mt-2" onClick={handleSaveProfile} disabled={isSavingProfile}>
+                                        {isSavingProfile ? 'Saving…' : 'Save Changes'}
+                                    </Button>
+                                    <Button className="mt-2" variant="outline" onClick={handleExportData}>
+                                        Export My Data
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
 

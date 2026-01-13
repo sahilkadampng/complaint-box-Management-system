@@ -87,32 +87,32 @@ const Sidebar: React.FC = () => {
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/register')}>
+                    onClick={() => navigate('/faculty-dashboard/register')}>
                     <Users className="h-4 w-4 mr-2" /> Register New User
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/ReportsPage')}>
+                    onClick={() => navigate('/faculty-dashboard/ReportsPage')}>
                     <Download className="h-4 w-4 mr-2" /> Reports
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/AnalyticsPage')}>
+                    onClick={() => navigate('/faculty-dashboard/AnalyticsPage')}>
                     <BarChart3 className="h-4 w-4 mr-2" /> Analytics
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/UserManagementPage')}>
+                    onClick={() => navigate('/faculty-dashboard/UserManagementPage')}>
                     <UserCog className="h-4 w-4 mr-2" /> User Management
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/settings')}>
+                    onClick={() => navigate('/faculty-dashboard/settings')}>
                     <Settings className="h-4 w-4 mr-2" /> Settings
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/help')}>
+                    onClick={() => navigate('/faculty-dashboard/help')}>
                     <HelpCircle className="h-4 w-4 mr-2" /> Help
                 </Button>
 

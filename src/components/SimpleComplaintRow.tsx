@@ -33,8 +33,25 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
         addNotification?.({ type: "success", message: "PDF Downloaded!" });
     };
 
-    const handleStatusUpdate = (value: ComplaintStatus, e: any) => {
-        e.stopPropagation();
+    const statusOrder: ComplaintStatus[] = ["submitted", "in_review", "assigned", "resolved", "escalated"];
+    const currentIndex = statusOrder.indexOf(complaint.status as ComplaintStatus);
+
+    const handleStatusUpdate = (value: ComplaintStatus) => {
+        const nextIndex = statusOrder.indexOf(value);
+
+        // Prevent going backward
+        if (nextIndex !== -1 && currentIndex !== -1 && nextIndex < currentIndex) {
+            addNotification?.({ type: "warning", message: "You cannot move a complaint back to a previous stage." });
+            return;
+        }
+
+        // Prevent skipping stages (only allow moving to the next immediate status or staying)
+        if (nextIndex !== -1 && currentIndex !== -1 && nextIndex > currentIndex + 1) {
+            const skippedStatus = statusOrder[currentIndex + 1].replace("_", " ");
+            addNotification?.({ type: "error", message: `Cannot skip stages. Please complete "${skippedStatus}" first.` });
+            return;
+        }
+
         onStatusChange?.(complaint.id, value);
     };
 
@@ -50,7 +67,7 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
 
     return (
         <div
-            onClick={() => navigate(`/complaint/${complaint.id}`)}
+            onClick={() => navigate(`/faculty-dashboard/complaint/${complaint.id}`)}
             className="
                 border-b cursor-pointer transition
                 hover:bg-gray-100 
@@ -84,19 +101,19 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
             <div className="md:block" onClick={(e) => e.stopPropagation()}>
                 {user?.role === "faculty" ? (
                     <Select
-                        defaultValue={complaint.status}
-                        onValueChange={(value) => handleStatusUpdate(value as ComplaintStatus, event)}
+                        value={complaint.status}
+                        onValueChange={(value) => handleStatusUpdate(value as ComplaintStatus)}
                     >
-                        <SelectTrigger className="h-8 w-full">
+                        <SelectTrigger className="h-8 w-full" onPointerDown={(e) => e.stopPropagation()}>
                             <SelectValue />
                         </SelectTrigger>
 
-                        <SelectContent>
-                            <SelectItem value="submitted"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-gray-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Submitted</p></div></SelectItem>
-                            <SelectItem value="in_review"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-amber-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">In Review</p></div></SelectItem>
-                            <SelectItem value="assigned"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-blue-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Assigned</p></div></SelectItem>
-                            <SelectItem value="resolved"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-green-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Resolved</p></div></SelectItem>
-                            <SelectItem value="escalated"><div className="flex justify-between items-start"><div className="h-2 w-2 bg-red-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Escalated</p></div></SelectItem>
+                        <SelectContent onPointerDown={(e) => e.stopPropagation()}>
+                            <SelectItem value="submitted" disabled={statusOrder.indexOf("submitted") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-gray-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Submitted</p></div></SelectItem>
+                            <SelectItem value="in_review" disabled={statusOrder.indexOf("in_review") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-amber-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">In Review</p></div></SelectItem>
+                            <SelectItem value="assigned" disabled={statusOrder.indexOf("assigned") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-blue-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Assigned</p></div></SelectItem>
+                            <SelectItem value="resolved" disabled={statusOrder.indexOf("resolved") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-green-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Resolved</p></div></SelectItem>
+                            <SelectItem value="escalated" disabled={statusOrder.indexOf("escalated") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-red-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Escalated</p></div></SelectItem>
                         </SelectContent>
                     </Select>
                 ) : (

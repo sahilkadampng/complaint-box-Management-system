@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { FileText, ArrowRight, Shield, Clock, CheckCircle, MessageSquare, BarChart3 } from 'lucide-react'
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { apiClient } from "@/lib/api";
 import studentImg from '@/assets/undraw_futuristic-interface_sv51.svg'
 import dpuImg from '@/assets/DYPDPUUnitechsocietylogo1.png';
 import studentImg1 from '@/assets/undraw_happy-news_d5bt.svg'
@@ -21,24 +22,66 @@ import studentImg10 from '@/assets/young-guy-brunette-semi-flat-vector-character
 export default function HomePage() {
     const [complaintsResolved, setComplaintsResolved] = useState<number>(0);
 
-    useEffect(() => {
-        try {
-            const savedComplaints = localStorage.getItem("complaints");
+    const stats = [
+        { label: "Complaints Resolved", value: `${complaintsResolved}+`, accent: "text-emerald-600" },
+        { label: "Avg Response Time", value: "48h", accent: "text-blue-600" },
+        { label: "Satisfaction Rate", value: "95%", accent: "text-amber-600" },
+    ];
 
-            if (savedComplaints) {
+    const loadResolvedCount = useCallback(async () => {
+        // If not authenticated, skip API and use local snapshot
+        const token = localStorage.getItem("token");
+
+        // Helper: local fallback
+        const loadFromLocal = () => {
+            try {
+                const savedComplaints = localStorage.getItem("complaints");
+                if (!savedComplaints) {
+                    setComplaintsResolved(0);
+                    return;
+                }
                 const parsed: any[] = JSON.parse(savedComplaints);
-
-                // Count resolved complaints ONLY
-                const resolvedCount = parsed.filter(
-                    (c) => c.status === "resolved"
-                ).length;
-
+                const resolvedCount = parsed.filter((c) => c.status === "resolved").length;
                 setComplaintsResolved(resolvedCount);
+            } catch (err) {
+                setComplaintsResolved(0);
+            }
+        };
+
+        if (!token) {
+            loadFromLocal();
+            return;
+        }
+
+        // Try backend first (authorised users)
+        try {
+            const res = await apiClient.getComplaints({ limit: 1000, status: "resolved" });
+            if (res.data?.complaints) {
+                const resolvedFromApi = res.data.complaints.length;
+                setComplaintsResolved(resolvedFromApi);
+                return;
             }
         } catch (err) {
-            console.error("Error reading complaints:", err);
+            // Silently fallback (common when token is invalid/expired)
         }
+
+        // Fallback: localStorage
+        loadFromLocal();
     }, []);
+
+    useEffect(() => {
+        loadResolvedCount();
+
+        // Refresh on interval and when window regains focus
+        const intervalId = window.setInterval(loadResolvedCount, 15000);
+        const onFocus = () => loadResolvedCount();
+        window.addEventListener("focus", onFocus);
+
+        return () => {
+            window.clearInterval(intervalId);
+            window.removeEventListener("focus", onFocus);
+        };
+    }, [loadResolvedCount]);
 
     // const handleComplaintSubmit = () => {
     //     setComplaintsResolved(prev => prev + 1);
@@ -84,7 +127,11 @@ export default function HomePage() {
                 </header>
 
                 {/* Hero Section */}
-                <section className="py-20 lg:py-28 bg-gradient-to-br from-muted/30 to-background">
+                <section className="py-20 lg:py-28 bg-gradient-to-br from-slate-50 via-white to-slate-100 relative overflow-hidden">
+                    <div className="absolute inset-0 pointer-events-none" aria-hidden>
+                        <div className="absolute -top-24 -right-12 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+                        <div className="absolute bottom-0 -left-16 h-64 w-64 rounded-full bg-blue-200/30 blur-3xl" />
+                    </div>
                     <img
                         src={studentImg}
                         alt="Student Illustration"
@@ -103,17 +150,12 @@ export default function HomePage() {
                     />
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center max-w-4xl mx-auto">
-                            <Badge variant="secondary" className="mb-6 mr-2">
-                                {/* Trusted by 10,000+ Students & Faculty */}
-                            </Badge>
-                            <Badge variant="secondary" className="mb-6 mr-2">
-                                {/* Trusted by 10,000+ Students & Faculty */}
-                            </Badge>
-                            <Badge variant="secondary" className="mb-6">
-                                {/* Trusted by 10,000+ Students & Faculty */}
-                            </Badge>
-                            <h2 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 text-balance">
+                        <div className="text-center max-w-4xl mx-auto relative z-10">
+                            <div className="flex flex-wrap gap-3 justify-center mb-6">
+                                <Badge variant="secondary" className="px-4 py-1">Trusted by students & faculty</Badge>
+                                <Badge variant="outline" className="px-4 py-1">Secure • Transparent • Fast</Badge>
+                            </div>
+                            <h2 className="text-4xl lg:text-6xl font-bold text-foreground mb-6 text-balance leading-tight">
                                 Voice Your Concerns,
                                 <br />
                                 <span className="text-accent">Drive Change</span>
@@ -135,19 +177,15 @@ export default function HomePage() {
                             </div>
 
                             {/* Stats */}
-                            <div className="grid grid-cols-3 gap-8 max-w-md mx-auto">
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-foreground">{complaintsResolved}+</div>
-                                    <div className="text-sm text-muted-foreground">Complaints Resolved</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-foreground">48h</div>
-                                    <div className="text-sm text-muted-foreground">Avg Response Time</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-foreground">95%</div>
-                                    <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
-                                </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                                {stats.map((item) => (
+                                    <Card key={item.label} className="border border-slate-200 shadow-sm">
+                                        <CardContent className="p-4 text-center">
+                                            <div className={`text-2xl font-bold ${item.accent}`}>{item.value}</div>
+                                            <div className="text-sm text-muted-foreground mt-1">{item.label}</div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
                             </div>
                         </div>
                     </div>

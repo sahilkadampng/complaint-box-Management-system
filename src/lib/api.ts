@@ -37,7 +37,17 @@ class ApiClient {
                 headers,
             });
 
-            const data = await response.json();
+            let data: any = null;
+            try {
+                data = await response.json();
+            } catch (parseErr) {
+                const text = await response.text();
+                data = { message: text || 'Non-JSON response from server' };
+                if (import.meta.env.DEV) {
+                    // eslint-disable-next-line no-console
+                    console.warn('API non-JSON response', { endpoint, text });
+                }
+            }
 
             if (!response.ok) {
                 console.error('API Error:', {

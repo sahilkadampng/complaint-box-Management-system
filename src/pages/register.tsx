@@ -11,7 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { GraduationCap, Users, ArrowLeft, Eye, EyeOff } from "lucide-react";
 // import Navbar from "@/components/Navbar";
 import FacultyLayout from "@/components/FacultyLayout";
-import Sidebar from '@/components/Sidebar';
+// import Sidebar from '@/components/Sidebar';
 
 const RegisterUserPage: React.FC = () => {
     const { signup, user } = useAuth();
@@ -28,6 +28,7 @@ const RegisterUserPage: React.FC = () => {
         studentId: "",
         rollNumber: "",
         department: "",
+        section: "",
         yearOfStudy: "",
         phoneNumber: "",
         program: "",
@@ -72,6 +73,16 @@ const RegisterUserPage: React.FC = () => {
             return;
         }
 
+        if (!formData.department) {
+            addNotification({ type: "error", message: "Please select a department" });
+            return;
+        }
+
+        if (!formData.section.trim()) {
+            addNotification({ type: "error", message: "Please enter section" });
+            return;
+        }
+
         setIsLoading(true);
 
         try {
@@ -86,6 +97,7 @@ const RegisterUserPage: React.FC = () => {
 
                 // Optional: for students
                 department: formData.department,
+                section: formData.section.trim(),
                 yearOfStudy: formData.yearOfStudy,
             });
 
@@ -101,6 +113,7 @@ const RegisterUserPage: React.FC = () => {
                     studentId: "",
                     rollNumber: "",
                     department: "",
+                    section: "",
                     yearOfStudy: "",
                     phoneNumber: "",
                     program: "",
@@ -124,7 +137,7 @@ const RegisterUserPage: React.FC = () => {
     return (
         <FacultyLayout>
             <div className="font-body flex w-full">
-                <Sidebar />
+                {/* <Sidebar /> */}
 
                 <div className="max-w-2xl mx-auto px-6 py-8">
                     <Button className="bg-gray-100 hover:bg-gray-200 text-black shadow-sm mb-4 mt-20" onClick={() => navigate("/faculty-dashboard")}>
@@ -191,6 +204,41 @@ const RegisterUserPage: React.FC = () => {
                                                 value={formData.username}
                                                 onChange={(e) => handleInputChange("username", e.target.value)}
                                                 placeholder="Choose a username"
+                                                required
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="department">Department *</Label>
+                                            <Select
+                                                value={formData.department}
+                                                onValueChange={(value) => {
+                                                    handleInputChange("department", value);
+                                                    // Reset program when department changes
+                                                    handleInputChange("program", "");
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select Department" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {Object.keys(departmentPrograms).map((dept) => (
+                                                        <SelectItem key={dept} value={dept}>
+                                                            {dept}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="section">Section *</Label>
+                                            <Input
+                                                id="section"
+                                                type="text"
+                                                value={formData.section}
+                                                onChange={(e) => handleInputChange("section", e.target.value)}
+                                                placeholder="Enter section (e.g., A/B)"
                                                 required
                                             />
                                         </div>
@@ -282,28 +330,6 @@ const RegisterUserPage: React.FC = () => {
                                             <div className="space-y-2">
                                                 <Label htmlFor="rollNumber">Roll Number *</Label>
                                                 <Input id="rollNumber" type="text" value={formData.rollNumber} onChange={(e) => handleInputChange("rollNumber", e.target.value)} />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="department">Department *</Label>
-                                                <Select
-                                                    value={formData.department}
-                                                    onValueChange={(value) => {
-                                                        handleInputChange("department", value);
-                                                        handleInputChange("program", "");
-                                                    }}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select Department" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {Object.keys(departmentPrograms).map((dept) => (
-                                                            <SelectItem key={dept} value={dept}>
-                                                                {dept}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
                                             </div>
 
                                             {formData.department && (

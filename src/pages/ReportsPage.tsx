@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 
-import Sidebar from "@/components/Sidebar";
+// import Sidebar from "@/components/Sidebar";
 import Breadcrumb from "@/components/Breadcrumb";
-import FacultyLayout from "@/components/FacultyLayout";
 
 import {
     Card,
@@ -52,16 +51,23 @@ export default function ReportsPage() {
             }))
             : [{ status: apiComplaint.status || 'submitted', date: created }];
 
+        // Handle null/undefined studentId safely (typeof null === 'object' in JS)
+        const studentIdObj = apiComplaint.studentId;
+        let studentIdVal = '';
+        if (studentIdObj && typeof studentIdObj === 'object') {
+            studentIdVal = studentIdObj._id || studentIdObj.id || '';
+        } else if (studentIdObj) {
+            studentIdVal = studentIdObj;
+        }
+
         return {
-            id: apiComplaint._id || apiComplaint.id,
-            title: apiComplaint.title,
-            description: apiComplaint.description,
-            category: apiComplaint.category,
-            studentId: typeof apiComplaint.studentId === 'object'
-                ? apiComplaint.studentId._id || apiComplaint.studentId.id
-                : apiComplaint.studentId,
-            studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
-            studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
+            id: apiComplaint._id || apiComplaint.id || '',
+            title: apiComplaint.title || '',
+            description: apiComplaint.description || '',
+            category: apiComplaint.category || '',
+            studentId: studentIdVal,
+            studentName: apiComplaint.studentName || (studentIdObj?.name || ''),
+            studentUsername: apiComplaint.studentUsername || (studentIdObj?.username || ''),
             createdAt: created,
             status: apiComplaint.status || 'submitted',
             history,
@@ -123,36 +129,35 @@ export default function ReportsPage() {
     };
 
     return (
-        <FacultyLayout>
-            <div className="font-body flex w-full bg-gray-50">
+        <div className="font-body flex w-full bg-gray-50">
 
-                {/* SIDEBAR */}
-                <Sidebar />
+            {/* SIDEBAR */}
+            {/* <Sidebar /> */}
 
-                {/* MAIN AREA */}
-                <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
+            {/* MAIN AREA */}
+            <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
 
-                    {/* NAVBAR TITLE */}
-                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
-                        <div>
-                            <h1 className="text-2xl font-bold mb-1 text-black mb-3 mt-10">Reports</h1>
-                            <p className="text-black text-sm md:text-base">Manage your account and preferences</p>
-                        </div>
+                {/* NAVBAR TITLE */}
+                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
+                    <div>
+                        <h1 className="text-2xl font-bold text-black mb-3 mt-10">Reports</h1>
+                        <p className="text-black text-sm md:text-base">Manage your account and preferences</p>
+                    </div>
 
-                        {/* <div className="flex flex-wrap gap-2 md:gap-4 mt-10 mr-4">
+                    {/* <div className="flex flex-wrap gap-2 md:gap-4 mt-10 mr-4">
                             <Input placeholder="Search complaints, student or category..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-80 bg-white-100" />
                             <Button variant="secondary" onClick={exportPDF}><Download className="h-4 w-4 mr-0" /> Export Summary</Button>
                         </div> */}
-                    </div>
+                </div>
 
-                    <main className="max-w-7xl mx-auto px-2 py-2">
-                        <hr className="my-4" />
-                        <Breadcrumb current="Reports" />
+                <main className="max-w-7xl mx-auto px-2 py-2">
+                    <hr className="my-4" />
+                    <Breadcrumb current="Reports" />
 
-                        {/* -------------------------------
+                    {/* -------------------------------
                         SUMMARY CARDS (LIVE)
                     -------------------------------- */}
-                        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
 
                             <Card className="shadow-card rounded-md">
                                 <CardContent className="p-5 flex justify-between items-center">
@@ -195,67 +200,66 @@ export default function ReportsPage() {
                             </Card>
                         </div> */}
 
-                        {/* -------------------------------
+                    {/* -------------------------------
                         TABLE (LATEST 10)
                     -------------------------------- */}
-                        <div className="mt-8">
-                            <Card className="shadow-card rounded-md">
-                                <CardHeader>
-                                    <CardTitle>Recent Complaints - latest 100</CardTitle>
-                                </CardHeader>
+                    <div className="mt-8">
+                        <Card className="shadow-card rounded-md">
+                            <CardHeader>
+                                <CardTitle>Recent Complaints - latest 100</CardTitle>
+                            </CardHeader>
 
-                                <CardContent>
-                                    <div className="overflow-x-auto rounded-md border">
-                                        <table className="w-full text-sm border-collapse">
-                                            <thead className="bg-gray-100 text-gray-700">
-                                                <tr className="text-left">
-                                                    <th className="px-4 py-3 text-left font-semibold">ID</th>
-                                                    <th className="px-4 py-3 text-left font-semibold">Title</th>
-                                                    <th className="px-4 py-3 text-left font-semibold">Student</th>
-                                                    <th className="px-4 py-3 text-left font-semibold">Category</th>
-                                                    <th className="px-4 py-3 text-left font-semibold">Status</th>
-                                                    <th className="px-4 py-3 text-left font-semibold">Created</th>
+                            <CardContent>
+                                <div className="overflow-x-auto rounded-md border">
+                                    <table className="w-full text-sm border-collapse">
+                                        <thead className="bg-gray-100 text-gray-700">
+                                            <tr className="text-left">
+                                                <th className="px-4 py-3 text-left font-semibold">ID</th>
+                                                <th className="px-4 py-3 text-left font-semibold">Title</th>
+                                                <th className="px-4 py-3 text-left font-semibold">Student</th>
+                                                <th className="px-4 py-3 text-left font-semibold">Category</th>
+                                                <th className="px-4 py-3 text-left font-semibold">Status</th>
+                                                <th className="px-4 py-3 text-left font-semibold">Created</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            {loading ? (
+                                                <tr>
+                                                    <td colSpan={6} className="px-4 py-3">Loading complaints…</td>
                                                 </tr>
-                                            </thead>
+                                            ) : filtered.length === 0 ? (
+                                                <tr>
+                                                    <td colSpan={6} className="px-4 py-3">No complaints found</td>
+                                                </tr>
+                                            ) : (
+                                                filtered
+                                                    .slice()
+                                                    .sort((a, b) =>
+                                                        new Date(b.createdAt).getTime() -
+                                                        new Date(a.createdAt).getTime()
+                                                    )
+                                                    .slice(0, 100)
+                                                    .map((c) => (
+                                                        <tr key={c.id} className="border-t">
+                                                            <td className="px-4 py-3">{c.id}</td>
+                                                            <td className="px-4 py-3">{c.title}</td>
+                                                            <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
+                                                            <td className="px-4 py-3">{c.category}</td>
+                                                            <td className="px-4 py-3">{c.status}</td>
+                                                            <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
+                                                        </tr>
+                                                    ))
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
 
-                                            <tbody>
-                                                {loading ? (
-                                                    <tr>
-                                                        <td colSpan={6} className="px-4 py-3">Loading complaints…</td>
-                                                    </tr>
-                                                ) : filtered.length === 0 ? (
-                                                    <tr>
-                                                        <td colSpan={6} className="px-4 py-3">No complaints found</td>
-                                                    </tr>
-                                                ) : (
-                                                    filtered
-                                                        .slice()
-                                                        .sort((a, b) =>
-                                                            new Date(b.createdAt).getTime() -
-                                                            new Date(a.createdAt).getTime()
-                                                        )
-                                                        .slice(0, 100)
-                                                        .map((c) => (
-                                                            <tr key={c.id} className="border-t">
-                                                                <td className="px-4 py-3">{c.id}</td>
-                                                                <td className="px-4 py-3">{c.title}</td>
-                                                                <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
-                                                                <td className="px-4 py-3">{c.category}</td>
-                                                                <td className="px-4 py-3">{c.status}</td>
-                                                                <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
-                                                            </tr>
-                                                        ))
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                    </main>
-                </div>
+                </main>
             </div>
-        </FacultyLayout>
+        </div>
     );
 }

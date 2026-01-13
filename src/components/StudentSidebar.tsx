@@ -94,7 +94,7 @@ const StudentSidebar: React.FC = () => {
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/student-analytics')}>
+                    onClick={() => navigate('/student/analytics')}>
                     <BarChart3 className="h-4 w-4 mr-2" /> Analytics
                 </Button>
 

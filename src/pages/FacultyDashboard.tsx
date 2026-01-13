@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useNotification } from '@/context/NotificationContext';;
 // import ComplaintList from '@/components/ComplaintList';
@@ -16,11 +16,13 @@ import Sidebar from '@/components/Sidebar';
 import { FileText, Filter, Download, Users, CheckCircle, AlertTriangle } from 'lucide-react';
 import type { Complaint, ComplaintStatus } from '@/components/ComplaintForm';
 import { apiClient } from '@/lib/api';
+import { Outlet } from "react-router-dom";
 
 const FacultyDashboard: React.FC = () => {
     const { user: _user } = useAuth();
     const { addNotification } = useNotification();
     const navigate = useNavigate();
+    const location = useLocation();
 
 
     const [complaints, setComplaints] = useState<Complaint[]>([]);
@@ -40,16 +42,23 @@ const FacultyDashboard: React.FC = () => {
             }))
             : [{ status: apiComplaint.status || 'submitted', date: created }];
 
+        // Handle null/undefined studentId safely (typeof null === 'object' in JS)
+        const studentIdObj = apiComplaint.studentId;
+        let studentIdVal = '';
+        if (studentIdObj && typeof studentIdObj === 'object') {
+            studentIdVal = studentIdObj._id || studentIdObj.id || '';
+        } else if (studentIdObj) {
+            studentIdVal = studentIdObj;
+        }
+
         return {
-            id: apiComplaint._id || apiComplaint.id,
-            title: apiComplaint.title,
-            description: apiComplaint.description,
-            category: apiComplaint.category,
-            studentId: typeof apiComplaint.studentId === 'object'
-                ? apiComplaint.studentId._id || apiComplaint.studentId.id
-                : apiComplaint.studentId,
-            studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
-            studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
+            id: apiComplaint._id || apiComplaint.id || "",
+            title: apiComplaint.title || '',
+            description: apiComplaint.description || '',
+            category: apiComplaint.category || '',
+            studentId: studentIdVal,
+            studentName: apiComplaint.studentName || (studentIdObj?.name || ''),
+            studentUsername: apiComplaint.studentUsername || (studentIdObj?.username || ''),
             createdAt: created,
             status: apiComplaint.status || 'submitted',
             history,
@@ -65,7 +74,12 @@ const FacultyDashboard: React.FC = () => {
                 const response = await apiClient.getComplaints();
 
                 if (response.error) {
-                    addNotification?.({ type: 'error', message: response.error });
+                    const message = response.error;
+                    const isAuthError = /unauthorized|token|jwt/i.test(message);
+                    addNotification?.({ type: 'error', message: isAuthError ? 'Session expired. Please login again.' : message });
+                    if (isAuthError) {
+                        navigate('/login', { replace: true });
+                    }
                     setComplaints([]);
                 } else if (response.data) {
                     const normalizedComplaints = response.data.complaints.map(normalizeComplaint);
@@ -73,7 +87,8 @@ const FacultyDashboard: React.FC = () => {
                 }
             } catch (error) {
                 console.error('Error loading complaints:', error);
-                addNotification?.({ type: 'error', message: 'Failed to load complaints' });
+                addNotification?.({ type: 'error', message: 'Failed to load complaints. Please check your connection or login again.' });
+                setComplaints([]);
             }
         };
 
@@ -201,27 +216,21 @@ const FacultyDashboard: React.FC = () => {
         const pageCount = typeof internalDoc.getNumberOfPages === "function"
             ? internalDoc.getNumberOfPages()
             : 1;
-
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-
             const pageWidth = doc.internal.pageSize.width;
             const pageHeight = doc.internal.pageSize.height;
-
             doc.setFontSize(10);
             doc.setTextColor(120, 120, 120);
-
             // Left footer
             doc.text(`Generated on: ${now.toLocaleString()}`, 40, pageHeight - 35);
             doc.text('DYPDPU Complaint Panel', 40, pageHeight - 20);
-
             // Right aligned page number
             doc.text(`Page ${i} of ${pageCount}`, pageWidth - 80, pageHeight - 20);
         }
         const fileName = `DPU-ComplaintReport(${now.toLocaleTimeString().replace(/:/g, ':')}).pdf`;
         doc.save(fileName);
     };
-
     const stats = {
         total: complaints.length,
         submitted: complaints.filter(c => c.status === 'submitted').length,
@@ -233,9 +242,7 @@ const FacultyDashboard: React.FC = () => {
             ? Math.round((complaints.filter(c => c.status === 'resolved').length / complaints.length) * 100)
             : 0
     };
-
     const categories = Array.from(new Set(complaints.map(c => c.category)));
-
     const clearFilters = () => {
         setSearchTerm('');
         setFilterStatus('all');
@@ -262,10 +269,27 @@ const FacultyDashboard: React.FC = () => {
     //     localStorage.setItem("complaints", JSON.stringify(checked));
     // }, []);
 
+    // Treat every nested route (anything beyond /faculty-dashboard) as a standalone view
+    const isChildRoute =
+        location.pathname === '/faculty-dashboard/'
+            ? false
+            : location.pathname.startsWith('/faculty-dashboard/') && location.pathname !== '/faculty-dashboard';
+
+    if (isChildRoute) {
+        return (
+            <FacultyLayout>
+                <div className="font-body flex w-full">
+                    <Sidebar />
+                    <div className="flex-1 h-screen overflow-y-auto bg-background md:ml-0 ml-0">
+                        <Outlet />
+                    </div>
+                </div>
+            </FacultyLayout>
+        );
+    }
     return (
         <FacultyLayout>
             <div className="font-body flex w-full">
-
                 {/*  */}
                 {/* <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-md z-50"> */}
                 <Sidebar />
@@ -273,6 +297,7 @@ const FacultyDashboard: React.FC = () => {
 
                 {/* Main Content */}
                 <div className="flex-1 h-screen overflow-y-auto bg-background md:ml-0 ml-0">
+                    <Outlet />
                     {/* Header */}
                     <div className="bg-white text-primary-foreground">
                         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-8">

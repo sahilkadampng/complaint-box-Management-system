@@ -17,6 +17,7 @@ export interface User {
     phoneNumber?: string;
     studentId?: string;
     rollNumber?: string;
+    section?: string;
     // Notification preferences
     emailAlerts?: boolean;
     systemMessages?: boolean;
@@ -53,6 +54,7 @@ const normalizeUser = (u: any): User | null => {
         phoneNumber: u.phoneNumber,
         studentId: u.studentId,
         rollNumber: u.rollNumber,
+        section: u.section,
         emailAlerts: typeof u.emailAlerts === 'boolean' ? u.emailAlerts : true,
         systemMessages: typeof u.systemMessages === 'boolean' ? u.systemMessages : true,
     } as User;

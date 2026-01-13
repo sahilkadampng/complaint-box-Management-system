@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar";
+// import Sidebar from "@/components/Sidebar";
 import FacultyLayout from "@/components/FacultyLayout";
 import Breadcrumb from "@/components/Breadcrumb";
 
@@ -45,7 +45,7 @@ export default function UserManagementPage() {
     useEffect(() => {
         (async () => {
             setLoading(true);
-            const res = await apiClient.getUsers({ page, limit });
+            const res = await apiClient.getUsers({ page, limit, role: 'all' });
             setLoading(false);
             if (!res.error && res.data?.users) {
                 setUsers(res.data.users);
@@ -162,7 +162,7 @@ export default function UserManagementPage() {
         <FacultyLayout>
             <div className="font-body flex w-full">
                 {/* Sidebar */}
-                <Sidebar />
+                {/* <Sidebar /> */}
 
                 {/* MAIN */}
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
@@ -281,7 +281,7 @@ export default function UserManagementPage() {
                             <Button variant="ghost" onClick={copyUserEmails}><Copy className="h-4 w-4 mr-2" />Copy Emails</Button>
                             <Button variant="outline" onClick={async () => {
                                 setLoading(true);
-                                const res = await apiClient.getUsers({ page, limit });
+                                const res = await apiClient.getUsers({ page, limit, role: 'all' });
                                 setLoading(false);
                                 if (!res.error && res.data?.users) {
                                     setUsers(res.data.users);

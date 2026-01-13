@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
 
     const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-    // ✅ SINGLE useEffect (fixed)
+    // SINGLE useEffect (fixed)
     useEffect(() => {
         const handler = () => setSidebarOpen(prev => !prev);
         window.addEventListener("toggleSidebar", handler);

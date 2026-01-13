@@ -1,7 +1,8 @@
 // AnalyticsPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import FacultyLayout from "@/components/FacultyLayout";
-import Sidebar from "@/components/Sidebar";
+// import Sidebar from "@/components/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,18 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import type { Complaint } from "@/components/ComplaintForm";
 
+// Lightweight tooltip: show date and total complaints for the hovered point
+const TrendHoverTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload || !payload.length) return null;
+    const count = payload[0]?.value ?? 0;
+    return (
+        <div className="rounded-md border bg-white px-3 py-2 shadow-sm text-xs">
+            <div className="font-semibold">{label}</div>
+            <div className="text-muted-foreground">{count} complaint(s)</div>
+        </div>
+    );
+};
+
 /**
  * AnalyticsPage
  * - Designed to match the complaint object used in your FacultyDashboard
@@ -36,6 +49,8 @@ const COLORS = ["#6B7280", "#ff9900", "#00aaff", "#109618", "#990099", "#6a1b9a"
 const AnalyticsPage: React.FC = () => {
     const [complaints, setComplaints] = useState<Complaint[]>([]);
     const [search, setSearch] = useState("");
+    const [selectedDay, setSelectedDay] = useState<{ dateLabel: string; items: Complaint[] } | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         (async () => {
@@ -129,17 +144,35 @@ const AnalyticsPage: React.FC = () => {
 
     //TREND (daily)
     const trendData = useMemo(() => {
-        const map: Record<string, number> = {};
+        if (!complaints.length) return [] as Array<{ dateLabel: string; count: number; items: Complaint[] }>;
+
+        // Normalize dates to midnight for grouping
+        const byDay = new Map<number, Complaint[]>();
+
         complaints.forEach((c) => {
-            // safe parse date
             const d = new Date(c.createdAt);
             if (isNaN(d.getTime())) return;
-            const key = d.toLocaleDateString();
-            map[key] = (map[key] || 0) + 1;
+            const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+            const arr = byDay.get(day) || [];
+            arr.push(c);
+            byDay.set(day, arr);
         });
-        return Object.entries(map)
-            .map(([date, count]) => ({ date, count }))
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // chronological
+
+        if (byDay.size === 0) return [] as Array<{ dateLabel: string; count: number; items: Complaint[] }>;
+
+        const times = Array.from(byDay.keys());
+        const minTime = Math.min(...times);
+        const maxTime = Math.max(...times);
+        const oneDay = 24 * 60 * 60 * 1000;
+
+        const series: Array<{ dateLabel: string; count: number; items: Complaint[] }> = [];
+        for (let t = minTime; t <= maxTime; t += oneDay) {
+            const d = new Date(t);
+            const label = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            const items = byDay.get(t) || [];
+            series.push({ dateLabel: label, count: items.length, items });
+        }
+        return series;
     }, [complaints]);
 
     //AVERAGE RESOLUTION TIME
@@ -208,6 +241,17 @@ const AnalyticsPage: React.FC = () => {
         return hidden + visible;
     };
 
+    // Shorten long descriptions for tables/cards
+    const truncateDescription = (text: string, maxChars = 40, maxWords = 8): string => {
+        if (!text) return "";
+        const words = text.trim().split(/\s+/).slice(0, maxWords).join(" ");
+        let snippet = words;
+        if (snippet.length > maxChars) {
+            snippet = snippet.slice(0, maxChars);
+        }
+        return snippet.length < text.trim().length ? `${snippet.trim()}…` : snippet;
+    };
+
 
     //EXPORT PDF
     const exportPDF = () => {
@@ -254,11 +298,21 @@ const AnalyticsPage: React.FC = () => {
         doc.save(`analytics_${now.toISOString().slice(0, 10)}.pdf`);
     };
 
+    const handleTrendClick = (chartData: any) => {
+        const payload = chartData?.activePayload?.[0]?.payload;
+        if (!payload) return;
+        if (selectedDay?.dateLabel === payload.dateLabel) {
+            setSelectedDay(null);
+            return;
+        }
+        setSelectedDay({ dateLabel: payload.dateLabel, items: payload.items || [] });
+    };
+
 
     return (
         <FacultyLayout>
             <div className="font-body flex w-full bg-gray-50 rounded-md">
-                <Sidebar />
+                {/* <Sidebar /> */}
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-4">
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-1 md:p-6">
                         <div>
@@ -321,14 +375,23 @@ const AnalyticsPage: React.FC = () => {
                             <CardHeader><CardTitle>Daily Trend</CardTitle></CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={220}>
-                                    <LineChart data={trendData}>
-                                        <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                                    <LineChart data={trendData} onClick={handleTrendClick} style={{ cursor: "pointer" }}>
+                                        <XAxis dataKey="dateLabel" tick={{ fontSize: 11 }} />
                                         <YAxis />
-                                        <Tooltip />
-                                        <Line type="monotone" dataKey="count" stroke="#ff7300" strokeWidth={2} />
+                                        <Tooltip content={<TrendHoverTooltip />} cursor={{ stroke: "#F2F2F2", strokeWidth: 1 }} />
+                                        <Line
+                                            type="monotone"
+                                            dataKey="count"
+                                            stroke="#ff7300"
+                                            strokeWidth={2}
+                                            dot={{ r: 5, strokeWidth: 2, cursor: "pointer" }}
+                                            activeDot={{ r: 6, strokeWidth: 2, stroke: "#ff7300", cursor: "pointer" }}
+                                        />
                                     </LineChart>
                                 </ResponsiveContainer>
-                                <div className="mt-4 text-sm text-muted-foreground">Daily complaints (based on createdAt)</div>
+                                <div className="mt-4 text-sm text-muted-foreground">
+                                    Click a point to open the complaints for that day below. Daily complaints (based on createdAt).
+                                </div>
                             </CardContent>
                         </Card>
 
@@ -356,6 +419,42 @@ const AnalyticsPage: React.FC = () => {
                             </div>
                         </Card>
                     </div>
+
+                    {selectedDay && (
+                        <div className="mt-0 mb-4">
+                            <Card className="shadow-card rounded-md border border-gray-200">
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                        <CardTitle>Complaints on {selectedDay.dateLabel}</CardTitle>
+                                        <Button size="sm" variant="ghost" onClick={() => setSelectedDay(null)}>Close</Button>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    {selectedDay.items.length === 0 && (
+                                        <div className="text-sm text-muted-foreground">No complaints for this day.</div>
+                                    )}
+                                    {selectedDay.items.map((c, idx) => {
+                                        const cid = (c as any)._id || (c as any).id || "";
+                                        return (
+                                            <div key={`${selectedDay.dateLabel}-${idx}`} className="rounded-md border px-3 py-2 bg-white flex flex-col gap-1">
+                                                <div className="font-medium leading-tight">{c.title || "Untitled complaint"}</div>
+                                                <div className="text-xs text-muted-foregroun text-pink-500">{c.category || "Uncategorized"}</div>
+                                                <div className="text-xs text-muted-foreground">{truncateDescription(c.description || "")}</div>
+                                                <div className="text-xs text-muted-foreground">Status: {c.status || "submitted"}</div>
+                                                {cid ? (
+                                                    <div>
+                                                        <Button size="sm" variant="outline" onClick={() => navigate(`/faculty-dashboard/complaint/${cid}`)}>
+                                                            Open complaint
+                                                        </Button>
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
 
                     {/* Top students and year-of-study */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -406,6 +505,7 @@ const AnalyticsPage: React.FC = () => {
                                             <tr className="text-left">
                                                 <th className="px-4 py-3 text-left font-semibold">ID</th>
                                                 <th className="px-4 py-3 text-left font-semibold">Title</th>
+                                                <th className="px-4 py-3 text-left font-semibold">Description</th>
                                                 <th className="px-4 py-3 text-left font-semibold">Student</th>
                                                 <th className="px-4 py-3 text-left font-semibold">Category</th>
                                                 <th className="px-4 py-3 text-left font-semibold">Status</th>
@@ -419,6 +519,7 @@ const AnalyticsPage: React.FC = () => {
                                                     <tr key={cid} className="border-t">
                                                         <td className="px-4 py-3">{cid}</td>
                                                         <td className="px-4 py-3">{c.title}</td>
+                                                        <td className="px-4 py-3">{truncateDescription((c as any).description || "")}</td>
                                                         <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
                                                         <td className="px-4 py-3">{c.category}</td>
                                                         <td className="px-4 py-3">{c.status}</td>
