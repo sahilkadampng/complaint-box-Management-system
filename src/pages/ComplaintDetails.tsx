@@ -28,9 +28,9 @@ export default function ComplaintDetails() {
             title: apiComplaint.title,
             description: apiComplaint.description,
             category: apiComplaint.category,
-            studentId: typeof apiComplaint.studentId === 'object'
-                ? apiComplaint.studentId._id || apiComplaint.studentId.id
-                : apiComplaint.studentId,
+            studentId: (typeof apiComplaint.studentId === 'object' && apiComplaint.studentId)
+                ? (apiComplaint.studentId._id || apiComplaint.studentId.id)
+                : (apiComplaint.studentId || ''),
             studentName: apiComplaint.studentName || (apiComplaint.studentId?.name || ''),
             studentUsername: apiComplaint.studentUsername || (apiComplaint.studentId?.username || ''),
             createdAt: created,
