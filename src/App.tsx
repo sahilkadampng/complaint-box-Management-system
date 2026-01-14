@@ -25,6 +25,7 @@ import AnalyticsPage from "./pages/AnalyticsPage";
 import StudentAnalyticsPage from "./pages/StudentAnalyticsPage";
 import HelpPage from "./pages/HelpPage";
 import ReportsPage from "./pages/ReportsPage";
+import StudentReportsPage from "./pages/StudentReportsPage";
 import ComplaintDetails from "./pages/ComplaintDetails";
 import UserManagementPage from "./pages/UserManagementPage";
 import Terms from "./pages/Terms";
@@ -136,6 +137,11 @@ const App = () => {
                                             <Route path="/student-analytics" element={
                                                 <ProtectedRoute requireRole>
                                                     <StudentAnalyticsPage />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/student/reports" element={
+                                                <ProtectedRoute requireRole>
+                                                    <StudentReportsPage />
                                                 </ProtectedRoute>
                                             } />
                                             <Route path="/profile" element={

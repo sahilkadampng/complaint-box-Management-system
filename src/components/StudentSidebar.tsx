@@ -89,7 +89,7 @@ const StudentSidebar: React.FC = () => {
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
-                    onClick={() => navigate('/student/complaints"')}>
+                    onClick={() => navigate('/student/reports')}>
                     <Download className="h-4 w-4 mr-2" /> Reports
                 </Button>
 
