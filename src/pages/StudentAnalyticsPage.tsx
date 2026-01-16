@@ -33,16 +33,18 @@ const StudentAnalyticsPage: React.FC = () => {
         const total = complaints.length;
         const submitted = complaints.filter(c => c.status === 'submitted').length;
         const in_review = complaints.filter(c => c.status === 'in_review').length;
+        const need_clarification = complaints.filter(c => c.status === 'need_clarification').length;
         const assigned = complaints.filter(c => c.status === 'assigned').length;
         const resolved = complaints.filter(c => c.status === 'resolved').length;
         const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
-        return { total, submitted, in_review, assigned, resolved, pct };
+        return { total, submitted, in_review, need_clarification, assigned, resolved, pct };
     }, [complaints]);
 
     const statusData = useMemo(() => {
         return [
             { name: 'Submitted', value: stats.submitted },
             { name: 'In Review', value: stats.in_review },
+            { name: 'Need Clarification', value: stats.need_clarification },
             { name: 'Assigned', value: stats.assigned },
             { name: 'Resolved', value: stats.resolved },
         ];

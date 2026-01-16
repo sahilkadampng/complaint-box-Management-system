@@ -66,7 +66,7 @@ const AnalyticsPage: React.FC = () => {
                 const normalized: Complaint[] = raw.map((c: any) => {
                     const createdAt = c.createdAt ?? new Date().toISOString();
                     const history = Array.isArray(c.history) && c.history.length ? c.history : [{ status: c.status ?? 'submitted', date: createdAt }];
-                    const status = c.status === 'pending' ? 'in_review' : ['submitted', 'in_review', 'assigned', 'resolved', 'escalated'].includes(c.status) ? c.status : 'submitted';
+                    const status = c.status === 'pending' ? 'in_review' : ['submitted', 'in_review', 'assigned', 'under_clarification', 'resolved', 'escalated'].includes(c.status) ? c.status : 'submitted';
 
                     return {
                         ...c,
@@ -93,12 +93,13 @@ const AnalyticsPage: React.FC = () => {
         const total = complaints.length;
         const submitted = complaints.filter((c) => c.status === "submitted").length;
         const in_review = complaints.filter((c) => c.status === "in_review").length;
+        const need_clarification = complaints.filter((c) => c.status === "need_clarification").length;
         const assigned = complaints.filter((c) => c.status === "assigned").length;
         const resolved = complaints.filter((c) => c.status === "resolved").length;
         const escalated = complaints.filter((c) => c.status === "escalated").length;
         const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
         const students = new Set(complaints.map((c) => c.studentId)).size;
-        return { total, submitted, in_review, assigned, resolved, escalated, resolutionRate, students };
+        return { total, submitted, in_review, need_clarification, assigned, resolved, escalated, resolutionRate, students };
     }, [complaints]);
 
     //STATUS & CATEGORY DISTRIBUTIONS
@@ -106,6 +107,7 @@ const AnalyticsPage: React.FC = () => {
         return [
             { name: "Submitted", value: stats.submitted },
             { name: "In Review", value: stats.in_review },
+            { name: "Need Clarification", value: stats.need_clarification },
             { name: "Assigned", value: stats.assigned },
             { name: "Resolved", value: stats.resolved },
             { name: "Escalated", value: stats.escalated },

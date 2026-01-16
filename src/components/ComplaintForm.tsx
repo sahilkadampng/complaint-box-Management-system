@@ -28,7 +28,7 @@ import {
 
 
 export type ComplaintStatus =
-    "submitted" | "in_review" | "assigned" | "resolved" | "escalated";
+    "submitted" | "in_review" | "need_clarification" | "assigned" | "resolved" | "escalated";
 
 export interface ComplaintHistory {
     status: ComplaintStatus;

@@ -36,6 +36,7 @@ function maskText(text: string) {
 const statusLabel: Record<ComplaintStatus, string> = {
     submitted: "Submitted",
     in_review: "In Review",
+    need_clarification: "Need Clarification",
     assigned: "Assigned",
     resolved: "Resolved",
     escalated: "Escalated",
@@ -117,6 +118,7 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
         switch (status) {
             case 'submitted': return 'text-black-800';
             case 'in_review': return 'text-black-600';
+            case 'need_clarification': return 'text-black-600';
             case 'assigned': return 'text-black-800';
             case 'resolved': return 'text-black-600';
             case 'escalated': return 'text-black-600';
@@ -163,6 +165,12 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
                                         className="data-[highlighted]:bg-gray-100 data-[highlighted]:text-black transition-colors duration-150"
                                     >
                                         In Review
+                                    </SelectItem>
+                                    <SelectItem
+                                        value="need_clarification"
+                                        className="border-t border-dashed border-gray-400 my-1"
+                                    >
+                                        Need Clarification
                                     </SelectItem>
                                     <SelectItem
                                         value="assigned"
@@ -323,6 +331,7 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
                                                         <SelectContent>
                                                             <SelectItem value="submitted">Submitted</SelectItem>
                                                             <SelectItem value="in_review">In Review</SelectItem>
+                                                            <SelectItem value="need_clarification">Need Clarification</SelectItem>
                                                             <SelectItem value="assigned">Assigned</SelectItem>
                                                             <SelectItem value="resolved">Resolved</SelectItem>
                                                             <SelectItem value="escalated">Escalated</SelectItem>

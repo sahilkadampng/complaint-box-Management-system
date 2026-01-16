@@ -33,7 +33,7 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
         addNotification?.({ type: "success", message: "PDF Downloaded!" });
     };
 
-    const statusOrder: ComplaintStatus[] = ["submitted", "in_review", "assigned", "resolved", "escalated"];
+    const statusOrder: ComplaintStatus[] = ["submitted", "in_review", "need_clarification", "assigned", "resolved", "escalated"];
     const currentIndex = statusOrder.indexOf(complaint.status as ComplaintStatus);
 
     const handleStatusUpdate = (value: ComplaintStatus) => {
@@ -111,6 +111,7 @@ export default function SimpleComplaintRow({ complaint, onStatusChange }: Props)
                         <SelectContent onPointerDown={(e) => e.stopPropagation()}>
                             <SelectItem value="submitted" disabled={statusOrder.indexOf("submitted") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-gray-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Submitted</p></div></SelectItem>
                             <SelectItem value="in_review" disabled={statusOrder.indexOf("in_review") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-amber-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">In Review</p></div></SelectItem>
+                            <SelectItem value="need_clarification" disabled={statusOrder.indexOf("need_clarification") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-purple-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Need Clarification</p></div></SelectItem>
                             <SelectItem value="assigned" disabled={statusOrder.indexOf("assigned") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-blue-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Assigned</p></div></SelectItem>
                             <SelectItem value="resolved" disabled={statusOrder.indexOf("resolved") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-green-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Resolved</p></div></SelectItem>
                             <SelectItem value="escalated" disabled={statusOrder.indexOf("escalated") < currentIndex}><div className="flex justify-between items-start"><div className="h-2 w-2 bg-red-500 rounded-lg ml-[0px] mt-[5px]"></div><p className="ml-2 mb-0">Escalated</p></div></SelectItem>

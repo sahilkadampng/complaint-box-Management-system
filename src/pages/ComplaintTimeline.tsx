@@ -4,6 +4,7 @@ import type { ComplaintHistory, ComplaintStatus } from '@/components/ComplaintFo
 const statusSteps: { key: ComplaintStatus; label: string; icon: any }[] = [
     { key: "submitted", label: "Submitted", icon: Clock },
     { key: "in_review", label: "In Review", icon: Eye },
+        { key: "need_clarification", label: "Need Clarification", icon: AlertCircle },
     { key: "assigned", label: "Assigned", icon: UserCheck },
     { key: "resolved", label: "Resolved", icon: CheckCircle },
     { key: "escalated", label: "Escalated", icon: AlertCircle },
