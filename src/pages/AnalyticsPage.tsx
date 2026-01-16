@@ -513,7 +513,7 @@ const AnalyticsPage: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {filtered.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 1000).map((c) => {
+                                            {filtered.slice().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0,1000).map((c) => {
                                                 const cid = ((c as any)?._id) ?? (c as any).id ?? '-';
                                                 return (
                                                     <tr key={cid} className="border-t">
