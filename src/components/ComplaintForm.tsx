@@ -49,6 +49,8 @@ export interface Complaint {
     attachment?: string;
     department?: string;
     yearOfStudy?: string;
+    isRead?: boolean;
+    readBy?: string[];
 }
 
 interface ComplaintFormProps {

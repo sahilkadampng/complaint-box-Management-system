@@ -10,11 +10,13 @@ import { NetworkProvider } from "@/context/NetworkContext";
 import Notification from "@/components/Notification";
 import Index from "./pages/basic";
 import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";
 import RegisterUserPage from "./pages/register";
 import Signup from "./pages/Signup";
 import RoleSelection from "./pages/RoleSelection";
 import StudentDashboard from "./pages/StudentDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Profile from './pages/Profile';
 import ViewStudentsPage from "./pages/ViewStudentsPage";
 import ViewFacultyPage from "./pages/ViewFacultyPage";
@@ -58,7 +60,13 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, user } = useAuth();
 
     if (isAuthenticated && user?.role) {
-        return <Navigate to={user.role === 'student' ? '/student-dashboard' : '/faculty-dashboard'} replace />;
+        if (user.role === 'student') {
+            return <Navigate to="/student-dashboard" replace />;
+        } else if (user.role === 'faculty') {
+            return <Navigate to="/faculty-dashboard" replace />;
+        } else if (user.role === 'admin') {
+            return <Navigate to="/admin-dashboard" replace />;
+        }
     }
 
     return <>{children}</>;
@@ -90,6 +98,11 @@ const App = () => {
                                                     <Login />
                                                 </PublicRoute>
                                             } />
+                                            <Route path="/admin-login" element={
+                                                <PublicRoute>
+                                                    <AdminLogin />
+                                                </PublicRoute>
+                                            } />
                                             <Route path="/signup" element={
                                                 <PublicRoute>
                                                     <Signup />
@@ -100,7 +113,7 @@ const App = () => {
                                                     <RoleSelection />
                                                 </ProtectedRoute>
                                             } />
-                                            <Route path="/student-dashboard" element={
+                                            <Route path="/student/dashboard" element={
                                                 <ProtectedRoute requireRole>
                                                     <StudentDashboard />
                                                 </ProtectedRoute>
@@ -134,7 +147,7 @@ const App = () => {
                                                     </ProtectedRoute>
                                                 } />
                                             </Route>
-                                            <Route path="/student-analytics" element={
+                                            <Route path="/student/analytics" element={
                                                 <ProtectedRoute requireRole>
                                                     <StudentAnalyticsPage />
                                                 </ProtectedRoute>
@@ -147,6 +160,21 @@ const App = () => {
                                             <Route path="/profile" element={
                                                 <ProtectedRoute>
                                                     <Profile />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/admin-dashboard" element={
+                                                <ProtectedRoute requireRole>
+                                                    <AdminDashboard />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/complaint/:id" element={
+                                                <ProtectedRoute requireRole>
+                                                    <ComplaintDetails />
+                                                </ProtectedRoute>
+                                            } />
+                                            <Route path="/student-dashboard" element={
+                                                <ProtectedRoute requireRole>
+                                                    <StudentDashboard />
                                                 </ProtectedRoute>
                                             } />
                                             {/* Catch-all route */}

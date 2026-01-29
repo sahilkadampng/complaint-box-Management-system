@@ -16,7 +16,7 @@ const Login: React.FC = () => {
     const { addNotification } = useNotification();
     const navigate = useNavigate();
 
-    const [selectedRole, setSelectedRole] = useState<'student' | 'faculty' | null>(null);
+    const [selectedRole, setSelectedRole] = useState<'student' | 'faculty' | 'admin' | null>(null);
     const [formData, setFormData] = useState({
         username: '',
         password: ''
@@ -149,6 +149,14 @@ const Login: React.FC = () => {
                                         size="lg"
                                     >
                                         Faculty Login
+                                    </Button>
+                                    <Button
+                                        onClick={() => navigate("/admin-login")}
+                                        variant="secondary"
+                                        className="w-full hover:bg-red-700 transition-colors duration-200 bg-red-600"
+                                        size="lg"
+                                    >
+                                        Admin Login
                                     </Button>
                                 </div>
                             ) : (

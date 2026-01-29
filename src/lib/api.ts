@@ -209,6 +209,20 @@ class ApiClient {
             method: 'DELETE',
         });
     }
+
+    async patch<T = any>(endpoint: string, body?: any) {
+        return this.request<T>(endpoint, {
+            method: 'PATCH',
+            body: body ? JSON.stringify(body) : undefined,
+        });
+    }
+
+    async post<T = any>(endpoint: string, body?: any) {
+        return this.request<T>(endpoint, {
+            method: 'POST',
+            body: body ? JSON.stringify(body) : undefined,
+        });
+    }
 }
 
 export const apiClient = new ApiClient();

@@ -4,7 +4,7 @@ import type { ComplaintHistory, ComplaintStatus } from '@/components/ComplaintFo
 const statusSteps: { key: ComplaintStatus; label: string; icon: any }[] = [
     { key: "submitted", label: "Submitted", icon: Clock },
     { key: "in_review", label: "In Review", icon: Eye },
-        { key: "need_clarification", label: "Need Clarification", icon: AlertCircle },
+    { key: "need_clarification", label: "Need Clarification", icon: AlertCircle },
     { key: "assigned", label: "Assigned", icon: UserCheck },
     { key: "resolved", label: "Resolved", icon: CheckCircle },
     { key: "escalated", label: "Escalated", icon: AlertCircle },
@@ -31,10 +31,16 @@ export default function ComplaintTimeline({ history }: Props) {
                             {/* Connector */}
                             {idx !== 0 && (
                                 <div
-                                    className={`absolute top-3 -left-10 w-10 h-0.5 ${isDone ? "bg-gray-300" : "bg-gray-300"}`}
+                                    className={`absolute top-5 -left-10 w-10 h-0 border-t-2 ${idx === 2 || idx === 3
+                                        ? isDone
+                                            ? "border-dashed border-green-300"   // dashed + done
+                                            : "border-dashed border-gray-300"
+                                        : isDone
+                                            ? "border-solid border-green-300"
+                                            : "border-solid border-gray-300"
+                                        }`}
                                 />
                             )}
-
                             <div
                                 className={`flex items-center justify-center w-10 h-10 rounded-full border-2 mb-2 ${isDone ? "border-green-500 bg-green-100" : "border-gray-300 bg-gray-100"
                                     }`}

@@ -168,7 +168,7 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
                                     </SelectItem>
                                     <SelectItem
                                         value="need_clarification"
-                                        className="border-t border-dashed border-gray-400 my-1"
+                                        className="data-[highlighted]:bg-red-100 data-[highlighted]:text-red-500 transition-colors duration-150"
                                     >
                                         Need Clarification
                                     </SelectItem>
