@@ -74,6 +74,7 @@ export default function ReportsPage() {
             attachment: apiComplaint.attachment || '',
             department: apiComplaint.department || '',
             yearOfStudy: apiComplaint.yearOfStudy || '',
+            clarificationMessage: apiComplaint.clarificationMessage || '',
         };
     };
 

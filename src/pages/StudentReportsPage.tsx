@@ -59,6 +59,7 @@ export default function StudentReportsPage() {
             attachment: apiComplaint.attachment || "",
             department: apiComplaint.department || "",
             yearOfStudy: apiComplaint.yearOfStudy || "",
+            clarificationMessage: apiComplaint.clarificationMessage || "",
         };
     };
 

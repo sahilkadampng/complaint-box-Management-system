@@ -16,6 +16,7 @@ import Signup from "./pages/Signup";
 import RoleSelection from "./pages/RoleSelection";
 import StudentDashboard from "./pages/StudentDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
+// import FacultyProfile from "./pages/FacultyProfile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Profile from './pages/Profile';
 import ViewStudentsPage from "./pages/ViewStudentsPage";
@@ -123,6 +124,7 @@ const App = () => {
                                                     <FacultyDashboard />
                                                 </ProtectedRoute>
                                             }>
+                                                {/* <Route path="profile" element={<FacultyProfile />} /> */}
                                                 <Route path="view-students" element={<ViewStudentsPage />} />
                                                 <Route path="view-faculty" element={<ViewFacultyPage />} />
                                                 <Route path="help" element={<HelpPage />} />

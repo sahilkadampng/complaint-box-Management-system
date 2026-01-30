@@ -51,6 +51,7 @@ export interface Complaint {
     yearOfStudy?: string;
     isRead?: boolean;
     readBy?: string[];
+    clarificationMessage?: string;
 }
 
 interface ComplaintFormProps {

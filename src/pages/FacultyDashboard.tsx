@@ -8,9 +8,11 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import FacultyLayout from "@/components/FacultyLayout";
 import Sidebar from '@/components/Sidebar';
 import { FileText, Filter, Download, Users, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -31,6 +33,11 @@ const FacultyDashboard: React.FC = () => {
     const [filterStatus, setFilterStatus] = useState<'all' | ComplaintStatus>('all');
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('newest');
+    
+    // Clarification dialog state
+    const [showClarificationDialog, setShowClarificationDialog] = useState(false);
+    const [clarificationMessage, setClarificationMessage] = useState('');
+    const [pendingComplaintId, setPendingComplaintId] = useState<string | null>(null);
 
     // Normalize API complaint to frontend format
     const normalizeComplaint = (apiComplaint: any): Complaint => {
@@ -65,13 +72,14 @@ const FacultyDashboard: React.FC = () => {
             attachment: apiComplaint.attachment || '',
             department: apiComplaint.department || '',
             yearOfStudy: apiComplaint.yearOfStudy || '',
+            clarificationMessage: apiComplaint.clarificationMessage || '',
         };
     };
 
     useEffect(() => {
         const loadComplaints = async () => {
             try {
-                const response = await apiClient.getComplaints();
+                const response = await apiClient.getComplaints({ limit: 1000 });
 
                 if (response.error) {
                     const message = response.error;
@@ -123,9 +131,16 @@ const FacultyDashboard: React.FC = () => {
         setFilteredComplaints(filtered);
     }, [complaints, searchTerm, filterStatus, filterCategory, sortBy]);
 
-    const handleStatusChange = async (complaintId: string, newStatus: ComplaintStatus) => {
+    const handleStatusChange = async (complaintId: string, newStatus: ComplaintStatus, clarificationMsg?: string) => {
+        // If status is need_clarification and no message provided yet, show dialog
+        if (newStatus === 'need_clarification' && !clarificationMsg) {
+            setPendingComplaintId(complaintId);
+            setShowClarificationDialog(true);
+            return;
+        }
+
         try {
-            const response = await apiClient.updateComplaintStatus(complaintId, newStatus);
+            const response = await apiClient.updateComplaintStatus(complaintId, newStatus, undefined, undefined, clarificationMsg);
 
             if (response.error) {
                 addNotification?.({ type: 'error', message: response.error });
@@ -136,11 +151,30 @@ const FacultyDashboard: React.FC = () => {
                 const updated = normalizeComplaint(response.data.complaint);
                 setComplaints(prev => prev.map(c => c.id === updated.id ? updated : c));
                 addNotification?.({ type: 'success', message: 'Complaint status updated successfully' });
+                
+                if (newStatus === 'need_clarification') {
+                    addNotification?.({ type: 'info', message: 'Student will be notified about the clarification needed' });
+                }
             }
         } catch (error) {
             console.error('Error updating status:', error);
             addNotification?.({ type: 'error', message: 'Failed to update complaint status' });
         }
+    };
+    
+    const handleClarificationSubmit = () => {
+        if (!clarificationMessage.trim()) {
+            addNotification?.({ type: 'error', message: 'Please enter a clarification message' });
+            return;
+        }
+
+        if (pendingComplaintId) {
+            handleStatusChange(pendingComplaintId, 'need_clarification', clarificationMessage);
+        }
+
+        setShowClarificationDialog(false);
+        setClarificationMessage('');
+        setPendingComplaintId(null);
     };
     const handleRegisterUser = () => navigate('/register');
 
@@ -306,6 +340,9 @@ const FacultyDashboard: React.FC = () => {
                                 <p className="text-black text-sm md:text-base">Manage and resolve student complaints efficiently</p>
                             </div>
                             <div className="flex flex-wrap gap-2 md:gap-4 mt-4">
+                                {/* <Button variant="secondary" size="sm" onClick={() => navigate('/faculty-dashboard/profile')}>
+                                    <User className="h-4 w-4 mr-2" /> Profile
+                                </Button> */}
                                 <Button variant="secondary" size="sm" onClick={handleRegisterUser}>
                                     <Users className="h-4 w-4 mr-2" /> Register New User
                                 </Button>
@@ -520,6 +557,48 @@ const FacultyDashboard: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Clarification Dialog */}
+            <Dialog open={showClarificationDialog} onOpenChange={setShowClarificationDialog}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>Request Clarification</DialogTitle>
+                        <DialogDescription>
+                            Please describe what additional information or clarification is needed from the student.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Clarification Message</label>
+                            <Textarea
+                                placeholder="Describe what clarification is needed..."
+                                value={clarificationMessage}
+                                onChange={(e) => setClarificationMessage(e.target.value)}
+                                rows={5}
+                                className="resize-none"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                The student will see this message and can provide the requested information.
+                            </p>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setShowClarificationDialog(false);
+                                setClarificationMessage('');
+                                setPendingComplaintId(null);
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button onClick={handleClarificationSubmit}>
+                            Submit Clarification Request
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </FacultyLayout >
     );
 };

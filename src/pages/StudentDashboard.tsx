@@ -64,6 +64,7 @@ const StudentDashboard: React.FC = () => {
             attachment: apiComplaint.attachment || '',
             department: apiComplaint.department || '',
             yearOfStudy: apiComplaint.yearOfStudy || '',
+            clarificationMessage: apiComplaint.clarificationMessage || '',
         };
     };
 
@@ -171,6 +172,27 @@ const StudentDashboard: React.FC = () => {
 
     const handleCancelEdit = () => {
         setEditingComplaint(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!deleteComplaint) return;
+
+        try {
+            const id = deleteComplaint.id;
+            const response = await apiClient.deleteComplaint(id);
+
+            if (response.error) {
+                addNotification?.({ type: 'error', message: response.error });
+                return;
+            }
+
+            setDeleteComplaint(null);
+            setComplaints(prev => prev.filter(c => c.id !== id));
+            addNotification?.({ type: 'success', message: 'Complaint deleted successfully!' });
+        } catch (error) {
+            console.error('Error deleting complaint:', error);
+            addNotification?.({ type: 'error', message: 'Failed to delete complaint' });
+        }
     };
 
     // Calculate statistics
@@ -570,14 +592,7 @@ Thank you for helping us improve our institution and services. Your involvement 
                                     {/* Action Buttons */}
                                     <div className="flex flex-col gap-3 mt-4">
                                         <button
-                                            onClick={() => {
-                                                const id = deleteComplaint.id;
-                                                setDeleteComplaint(null);
-                                                setTimeout(() => {
-                                                    const updated = complaints.filter(c => c.id !== id);
-                                                    setComplaints(updated);
-                                                }, 0);
-                                            }}
+                                            onClick={handleConfirmDelete}
                                             className="w-full px-4 py-2 rounded-md bg-red-500 text-white font-semibold"
                                         >
                                             Delete Complaint

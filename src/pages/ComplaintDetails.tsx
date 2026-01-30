@@ -39,6 +39,7 @@ export default function ComplaintDetails() {
             attachment: apiComplaint.attachment || '',
             department: apiComplaint.department || '',
             yearOfStudy: apiComplaint.yearOfStudy || '',
+            clarificationMessage: apiComplaint.clarificationMessage || '',
         };
     };
 

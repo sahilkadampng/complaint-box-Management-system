@@ -264,6 +264,18 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
                                     {complaint.description}
                                 </p>
 
+                                {/* Clarification Message */}
+                                {complaint.status === 'need_clarification' && complaint.clarificationMessage && (
+                                    <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                                        <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
+                                            Clarification Requested by Faculty
+                                        </h4>
+                                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                                            {complaint.clarificationMessage}
+                                        </p>
+                                    </div>
+                                )}
+
                                 {/* Optional extra content hook */}
                                 {renderExtra && renderExtra(complaint)}
 

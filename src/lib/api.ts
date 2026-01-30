@@ -115,6 +115,23 @@ class ApiClient {
         });
     }
 
+    async uploadAvatar(formData: FormData) {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE_URL}/auth/avatar`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: formData,
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            return { error: data.message || 'Failed to upload avatar', data: null };
+        }
+        return { error: null, data };
+    }
+
     // Complaint endpoints
     async getComplaints(params?: {
         status?: string;
@@ -161,11 +178,12 @@ class ApiClient {
         id: string,
         status: string,
         note?: string,
-        assignedTo?: string
+        assignedTo?: string,
+        clarificationMessage?: string
     ) {
         return this.request<{ complaint: any }>(`/complaints/${id}/status`, {
             method: 'PATCH',
-            body: JSON.stringify({ status, note, assignedTo }),
+            body: JSON.stringify({ status, note, assignedTo, clarificationMessage }),
         });
     }
 

@@ -10,7 +10,7 @@ import type { Complaint, ComplaintStatus } from "./ComplaintForm";
 
 interface Props {
     complaint: Complaint;
-    onStatusChange?: (id: string, status: ComplaintStatus) => void;
+    onStatusChange?: (id: string, status: ComplaintStatus, clarificationMessage?: string) => void;
 }
 
 export default function SimpleComplaintRow({ complaint, onStatusChange }: Props) {
