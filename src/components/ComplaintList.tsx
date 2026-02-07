@@ -266,7 +266,7 @@ const ComplaintList: React.FC<ComplaintListProps> = ({
 
                                 {/* Clarification Message */}
                                 {complaint.status === 'need_clarification' && complaint.clarificationMessage && (
-                                    <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                                    <div className="mb-[-4px] p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
                                         <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
                                             Clarification Requested by Faculty
                                         </h4>
