@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
     Users, Download, BarChart3, UserCog, Settings,
-    HelpCircle, LogOut, MoveLeft
+    HelpCircle, LogOut, MoveLeft, Trophy
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -102,6 +102,11 @@ const Sidebar: React.FC = () => {
                 </Button>
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
+                    onClick={() => navigate('/faculty-dashboard/top-resolvers')}>
+                    <Trophy className="h-4 w-4 mr-2" /> Top Resolvers
+                </Button>
+
+                <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-gray-50"
                     onClick={() => navigate('/faculty-dashboard/UserManagementPage')}>
                     <UserCog className="h-4 w-4 mr-2" /> User Management
                 </Button>
@@ -116,7 +121,7 @@ const Sidebar: React.FC = () => {
                     <HelpCircle className="h-4 w-4 mr-2" /> Help
                 </Button>
 
-                <hr className="mt-[5rem]" />
+                <hr className="mt-[3rem]" />
 
                 <Button className="justify-start bg-white-100 text-black shadow shadow-card rounded-md hover:bg-red-50"
                     onClick={handleLogout}>

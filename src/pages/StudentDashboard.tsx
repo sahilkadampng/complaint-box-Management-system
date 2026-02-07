@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from "@/components/ui/label";
 import jsPDF from "jspdf";
-import { PlusCircle, FileText, BarChart3 } from 'lucide-react';
+import { PlusCircle, FileText, BarChart3, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import logo from '@/assets/DYPDPUUnitechsocietylogo1.png' // adjust path
 import { apiClient } from '@/lib/api';
 
@@ -37,6 +38,7 @@ const StudentDashboard: React.FC = () => {
 
     const [lastSubmitted, setLastSubmitted] = useState<SubmittedComplaint | null>(null);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [showQR, setShowQR] = useState(false);
 
     // normalize legacy data (old "pending"/"resolved", no history)
     const normalizeComplaint = (apiComplaint: any): Complaint => {
@@ -150,6 +152,7 @@ const StudentDashboard: React.FC = () => {
                     });
 
                     setShowSuccess(true);
+                    setShowQR(false);
                     setActiveTab('submit');
                 }
             }
@@ -436,8 +439,8 @@ Thank you for helping us improve our institution and services. Your involvement 
                             />
                             {/* Success Popup */}
                             {showSuccess && lastSubmitted && (
-                                <div className="fixed inset-0 flex items-center justify-center bg-green-100 z-50 p-4">
-                                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative">
+                                <div className="fixed inset-0 overflow-y-auto bg-green-100 z-[200] p-4">
+                                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 relative mx-auto my-8">
 
                                         {/* Close Button */}
                                         <button
@@ -506,13 +509,35 @@ Thank you for helping us improve our institution and services. Your involvement 
                                             </ul>
                                         </div>
 
-                                        {/* Download Receipt Button */}
-                                        <button
-                                            onClick={() => downloadComplaintPDF(lastSubmitted!)}
-                                            className="px-6 py-2 rounded-md bg-gray-600 text-white font-semibold hover:bg-gray-700 mt-5 "
-                                        >
-                                            Download Receipt
-                                        </button>
+                                        {/* QR Code Section */}
+                                        {showQR && (
+                                            <div className="flex flex-col items-center mt-4 p-4 bg-white border border-gray-200 rounded-lg">
+                                                <QRCodeSVG
+                                                    value={lastSubmitted!.id}
+                                                    size={180}
+                                                    level="H"
+                                                    includeMargin
+                                                />
+                                                <p className="text-xs text-gray-500 mt-2">Scan to get Complaint ID</p>
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-3 mt-5">
+                                            <button
+                                                onClick={() => setShowQR(prev => !prev)}
+                                                className="px-6 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 flex items-center gap-2"
+                                            >
+                                                <QrCode className="h-4 w-4" />
+                                                {showQR ? 'Hide QR' : 'Show QR'}
+                                            </button>
+                                            <button
+                                                onClick={() => downloadComplaintPDF(lastSubmitted!)}
+                                                className="px-6 py-2 rounded-md bg-gray-600 text-white font-semibold hover:bg-gray-700"
+                                            >
+                                                Download Receipt
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             )}

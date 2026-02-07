@@ -33,6 +33,7 @@ import ComplaintDetails from "./pages/ComplaintDetails";
 import UserManagementPage from "./pages/UserManagementPage";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import TopResolversPage from "./pages/TopResolversPage";
 
 
 
@@ -133,6 +134,7 @@ const App = () => {
                                                 <Route path="UserManagementPage" element={<UserManagementPage />} />
                                                 <Route path="terms" element={<Terms />} />
                                                 <Route path="privacy" element={<Privacy />} />
+                                                <Route path="top-resolvers" element={<TopResolversPage />} />
                                                 <Route path="settings" element={
                                                     <ProtectedRoute>
                                                         <Settings />
