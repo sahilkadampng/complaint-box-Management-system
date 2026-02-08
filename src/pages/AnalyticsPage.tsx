@@ -48,12 +48,14 @@ const COLORS = ["#6B7280", "#ff9900", "#00aaff", "#109618", "#990099", "#6a1b9a"
 
 const AnalyticsPage: React.FC = () => {
     const [complaints, setComplaints] = useState<Complaint[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [selectedDay, setSelectedDay] = useState<{ dateLabel: string; items: Complaint[] } | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
         (async () => {
+            setIsLoading(true);
             try {
                 const res = await apiClient.getComplaints({ limit: 1000 });
                 if (res.error) {
@@ -84,6 +86,8 @@ const AnalyticsPage: React.FC = () => {
             } catch (err) {
                 console.error('Error loading analytics complaints:', err);
                 setComplaints([]);
+            } finally {
+                setIsLoading(false);
             }
         })();
     }, []);
@@ -310,12 +314,58 @@ const AnalyticsPage: React.FC = () => {
         setSelectedDay({ dateLabel: payload.dateLabel, items: payload.items || [] });
     };
 
+    const SkeletonBlock = ({ className }: { className: string }) => (
+        <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
+    );
+
 
     return (
         <FacultyLayout>
             <div className="font-body flex w-full bg-gray-50 rounded-md">
                 {/* <Sidebar /> */}
                 <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-4">
+                    {isLoading ? (
+                        <div className="max-w-7xl mx-auto p-1 md:p-6">
+                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                                <div className="w-full md:w-2/3">
+                                    <SkeletonBlock className="h-8 w-64" />
+                                    <SkeletonBlock className="h-4 w-80 mt-3" />
+                                </div>
+                                <div className="flex flex-wrap gap-2 md:gap-4 mt-5 mr-4 w-full md:w-auto">
+                                    <SkeletonBlock className="h-10 w-80" />
+                                    <SkeletonBlock className="h-10 w-40" />
+                                </div>
+                            </div>
+
+                            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <SkeletonBlock className="h-20" />
+                                <SkeletonBlock className="h-20" />
+                                <SkeletonBlock className="h-20" />
+                                <SkeletonBlock className="h-20" />
+                            </div>
+
+                            <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <SkeletonBlock className="h-[420px]" />
+                                <SkeletonBlock className="h-[420px]" />
+                            </div>
+
+                            <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <SkeletonBlock className="h-[360px]" />
+                                <SkeletonBlock className="h-[360px]" />
+                                <SkeletonBlock className="h-[360px]" />
+                            </div>
+
+                            <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <SkeletonBlock className="h-[320px]" />
+                                <SkeletonBlock className="h-[320px]" />
+                            </div>
+
+                            <div className="mt-8">
+                                <SkeletonBlock className="h-[360px]" />
+                            </div>
+                        </div>
+                    ) : (
+                    <>
                     <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-1 md:p-6">
                         <div>
                             <h1 className="text-2xl font-bold text-black mb-3 mt-10">Analytics Dashboard</h1>
@@ -535,6 +585,8 @@ const AnalyticsPage: React.FC = () => {
                             </CardContent>
                         </Card>
                     </div>
+                    </>
+                    )}
                 </div>
             </div>
         </FacultyLayout >

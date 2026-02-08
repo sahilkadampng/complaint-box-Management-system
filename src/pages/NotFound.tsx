@@ -1,5 +1,3 @@
-import React from "react";
-
 const NotFoundPage = () => {
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-white p-4 md:p-10 ">

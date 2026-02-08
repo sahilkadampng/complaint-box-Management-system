@@ -40,6 +40,7 @@ export default function ReportsPage() {
     const [filtered, setFiltered] = useState<Complaint[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    void error;
 
     // Normalize API complaint to frontend format (same logic as other pages)
     const normalizeComplaint = (apiComplaint: any): Complaint => {
@@ -116,6 +117,7 @@ export default function ReportsPage() {
         ).length,
         escalated: complaints.filter(c => c.status === "escalated").length,
     };
+    void stats;
 
 
     // Helper: Mask Student Name
@@ -129,6 +131,10 @@ export default function ReportsPage() {
         return hidden + visible;
     };
 
+    const SkeletonBlock = ({ className }: { className: string }) => (
+        <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
+    );
+
     return (
         <div className="font-body flex w-full bg-gray-50">
 
@@ -137,23 +143,47 @@ export default function ReportsPage() {
 
             {/* MAIN AREA */}
             <div className="ml-[0rem] mr-[0rem] mt-10 flex-1 h-screen overflow-y-auto bg-background p-2">
+                {loading ? (
+                    <div className="max-w-7xl mx-auto px-2 py-2">
+                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
+                            <div className="w-full md:w-2/3">
+                                <SkeletonBlock className="h-8 w-56" />
+                                <SkeletonBlock className="h-4 w-72 mt-3" />
+                            </div>
+                        </div>
 
-                {/* NAVBAR TITLE */}
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-black mb-3 mt-10">Reports</h1>
-                        <p className="text-black text-sm md:text-base">Manage your account and preferences</p>
+                        <SkeletonBlock className="h-4 w-24 my-4" />
+
+                        <div className="mt-8">
+                            <SkeletonBlock className="h-8 w-64 mb-4" />
+                            <div className="rounded-md border p-4 space-y-3">
+                                <SkeletonBlock className="h-6 w-full" />
+                                <SkeletonBlock className="h-6 w-full" />
+                                <SkeletonBlock className="h-6 w-full" />
+                                <SkeletonBlock className="h-6 w-full" />
+                                <SkeletonBlock className="h-6 w-full" />
+                                <SkeletonBlock className="h-6 w-full" />
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                <>
+                    {/* NAVBAR TITLE */}
+                    <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between p-2 md:p-6">
+                        <div>
+                            <h1 className="text-2xl font-bold text-black mb-3 mt-10">Reports</h1>
+                            <p className="text-black text-sm md:text-base">Manage your account and preferences</p>
+                        </div>
+
+                        {/* <div className="flex flex-wrap gap-2 md:gap-4 mt-10 mr-4">
+                                <Input placeholder="Search complaints, student or category..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-80 bg-white-100" />
+                                <Button variant="secondary" onClick={exportPDF}><Download className="h-4 w-4 mr-0" /> Export Summary</Button>
+                            </div> */}
                     </div>
 
-                    {/* <div className="flex flex-wrap gap-2 md:gap-4 mt-10 mr-4">
-                            <Input placeholder="Search complaints, student or category..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-80 bg-white-100" />
-                            <Button variant="secondary" onClick={exportPDF}><Download className="h-4 w-4 mr-0" /> Export Summary</Button>
-                        </div> */}
-                </div>
-
-                <main className="max-w-7xl mx-auto px-2 py-2">
-                    <hr className="my-4" />
-                    <Breadcrumb current="Reports" />
+                    <main className="max-w-7xl mx-auto px-2 py-2">
+                        <hr className="my-4" />
+                        <Breadcrumb current="Reports" />
 
                     {/* -------------------------------
                         SUMMARY CARDS (LIVE)
@@ -204,62 +234,60 @@ export default function ReportsPage() {
                     {/* -------------------------------
                         TABLE (LATEST 10)
                     -------------------------------- */}
-                    <div className="mt-8">
-                        <Card className="shadow-card rounded-md">
-                            <CardHeader>
-                                <CardTitle>Recent Complaints - latest 100</CardTitle>
-                            </CardHeader>
+                        <div className="mt-8">
+                            <Card className="shadow-card rounded-md">
+                                <CardHeader>
+                                    <CardTitle>Recent Complaints - latest 100</CardTitle>
+                                </CardHeader>
 
-                            <CardContent>
-                                <div className="overflow-x-auto rounded-md border">
-                                    <table className="w-full text-sm border-collapse">
-                                        <thead className="bg-gray-100 text-gray-700">
-                                            <tr className="text-left">
-                                                <th className="px-4 py-3 text-left font-semibold">ID</th>
-                                                <th className="px-4 py-3 text-left font-semibold">Title</th>
-                                                <th className="px-4 py-3 text-left font-semibold">Student</th>
-                                                <th className="px-4 py-3 text-left font-semibold">Category</th>
-                                                <th className="px-4 py-3 text-left font-semibold">Status</th>
-                                                <th className="px-4 py-3 text-left font-semibold">Created</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            {loading ? (
-                                                <tr>
-                                                    <td colSpan={6} className="px-4 py-3">Loading complaints…</td>
+                                <CardContent>
+                                    <div className="overflow-x-auto rounded-md border">
+                                        <table className="w-full text-sm border-collapse">
+                                            <thead className="bg-gray-100 text-gray-700">
+                                                <tr className="text-left">
+                                                    <th className="px-4 py-3 text-left font-semibold">ID</th>
+                                                    <th className="px-4 py-3 text-left font-semibold">Title</th>
+                                                    <th className="px-4 py-3 text-left font-semibold">Student</th>
+                                                    <th className="px-4 py-3 text-left font-semibold">Category</th>
+                                                    <th className="px-4 py-3 text-left font-semibold">Status</th>
+                                                    <th className="px-4 py-3 text-left font-semibold">Created</th>
                                                 </tr>
-                                            ) : filtered.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan={6} className="px-4 py-3">No complaints found</td>
-                                                </tr>
-                                            ) : (
-                                                filtered
-                                                    .slice()
-                                                    .sort((a, b) =>
-                                                        new Date(b.createdAt).getTime() -
-                                                        new Date(a.createdAt).getTime()
-                                                    )
-                                                    .slice(0, 100)
-                                                    .map((c) => (
-                                                        <tr key={c.id} className="border-t">
-                                                            <td className="px-4 py-3">{c.id}</td>
-                                                            <td className="px-4 py-3">{c.title}</td>
-                                                            <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
-                                                            <td className="px-4 py-3">{c.category}</td>
-                                                            <td className="px-4 py-3">{c.status}</td>
-                                                            <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
-                                                        </tr>
-                                                    ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                            </thead>
 
-                </main>
+                                            <tbody>
+                                                {filtered.length === 0 ? (
+                                                    <tr>
+                                                        <td colSpan={6} className="px-4 py-3">No complaints found</td>
+                                                    </tr>
+                                                ) : (
+                                                    filtered
+                                                        .slice()
+                                                        .sort((a, b) =>
+                                                            new Date(b.createdAt).getTime() -
+                                                            new Date(a.createdAt).getTime()
+                                                        )
+                                                        .slice(0, 100)
+                                                        .map((c) => (
+                                                            <tr key={c.id} className="border-t">
+                                                                <td className="px-4 py-3">{c.id}</td>
+                                                                <td className="px-4 py-3">{c.title}</td>
+                                                                <td className="px-4 py-3">{maskName(c.studentName ?? c.studentId)}</td>
+                                                                <td className="px-4 py-3">{c.category}</td>
+                                                                <td className="px-4 py-3">{c.status}</td>
+                                                                <td className="px-4 py-3">{new Date(c.createdAt).toLocaleString()}</td>
+                                                            </tr>
+                                                        ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                    </main>
+                </>
+                )}
             </div>
         </div>
     );

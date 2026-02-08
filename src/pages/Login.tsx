@@ -16,7 +16,7 @@ const Login: React.FC = () => {
     const { addNotification } = useNotification();
     const navigate = useNavigate();
 
-    const [selectedRole, setSelectedRole] = useState<'student' | 'faculty' | 'admin' | null>(null);
+    const [selectedRole, setSelectedRole] = useState<'student' | 'faculty' | null>(null);
     const [formData, setFormData] = useState({
         username: '',
         password: ''
