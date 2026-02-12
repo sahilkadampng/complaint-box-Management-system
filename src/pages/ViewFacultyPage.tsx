@@ -135,7 +135,7 @@ const ViewFacultyPage: React.FC = () => {
                                 placeholder="Search faculty..."
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
-                                className="w-64 md:w-64 w-full"
+                                className="md:w-64 w-full"
                             />
                             <Button
                                 onClick={handleDownloadPDF}
