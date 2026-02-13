@@ -83,6 +83,8 @@ export default function HomePage() {
         };
     }, [loadResolvedCount]);
 
+    console.log("API URL:", import.meta.env.VITE_APP_URL);
+
     // const handleComplaintSubmit = () => {
     //     setComplaintsResolved(prev => prev + 1);
     // };
