@@ -83,7 +83,7 @@ export default function HomePage() {
         };
     }, [loadResolvedCount]);
 
-    console.log("API URL:", import.meta.env.VITE_APP_URL);
+    console.log("bakchodi mat karna 🌹");
 
     // const handleComplaintSubmit = () => {
     //     setComplaintsResolved(prev => prev + 1);
