@@ -361,12 +361,19 @@ const Navbar: React.FC = () => {
                                         <span className="ml-2 font-medium hidden sm:inline text-gray-500">{user?.name}</span>
                                     </div>
                                     <DropdownMenuContent className="w-56 z-50" align="end" forceMount>
-                                        <div className="flex items-center justify-start gap-2 p-2 font-vend">
-                                            <div className="flex flex-col space-y-1 leading-none">
-                                                <p className="font-medium">{user?.name}</p>
-                                                <p className="text-xs text-muted-foreground">{user?.email}</p>
-                                                <p className="text-xs text-pink-500 capitalize">{user?.role}</p>
-                                            </div>
+                                        <div className="flex items-center w-full p-2 font-vend">
+                                            <Avatar className="relative h-10 w-10 rounded-full">
+                                                <AvatarImage src={user?.profilePicture} alt={user?.name} />
+                                                <AvatarFallback className="bg-primary text-primary-foreground">
+                                                    {getInitials(user?.name)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <p className="text-sm ml-2">
+                                                {user?.name}
+                                            </p>
+                                            <p className="text-sm text-pink-500 capitalize ml-auto">
+                                                {user?.role}
+                                            </p>
                                         </div>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem
@@ -375,9 +382,28 @@ const Navbar: React.FC = () => {
                 data-[highlighted]:bg-gray-100 data-[highlighted]:text-black"
                                         >
                                             {/* ✅ Fixed here */}
-                                            <Link to="/profile" className="flex items-center font-vend">
+                                            <Link to="/profile" className="flex items-center font-vend cursor-pointer">
                                                 <User className="mr-0 h-4 w-4" />
                                                 Profile
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="px-2 py-1 rounded-md transition-colors duration-150 
+                data-[highlighted]:bg-gray-100 data-[highlighted]:text-black"
+                                        ><Link to="/profile" className="flex items-center font-vend cursor-pointer">
+                                                <User className="mr-0 h-4 w-4" />
+                                                Get help
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            asChild
+                                            className="px-2 py-1 rounded-md transition-colors duration-150 
+                data-[highlighted]:bg-gray-100 data-[highlighted]:text-black"
+                                        ><Link to="/profile" className="flex items-center font-vend cursor-pointer">
+                                                <User className="mr-0 h-4 w-4" />
+                                                Help center
                                             </Link>
                                         </DropdownMenuItem>
                                         {user?.role === 'admin' && (
