@@ -23,9 +23,9 @@ export default function HomePage() {
     const [complaintsResolved, setComplaintsResolved] = useState<number>(0);
 
     const stats = [
-        { label: "Complaints Resolved", value: `${complaintsResolved}+`, accent: "text-emerald-600" },
-        { label: "Avg Response Time", value: "48h", accent: "text-blue-600" },
-        { label: "Satisfaction Rate", value: "95%", accent: "text-amber-600" },
+        { label: "Complaints Resolved", value: `${complaintsResolved}+`, accent: "text-black" },
+        { label: "Avg Response Time", value: "48h", accent: "text-black" },
+        { label: "Satisfaction Rate", value: "95%", accent: "text-black" },
     ];
 
     const loadResolvedCount = useCallback(async () => {
