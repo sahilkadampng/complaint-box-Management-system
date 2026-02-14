@@ -83,6 +83,51 @@ class ApiClient {
         }
     }
 
+    /**
+     * Send a multipart/form-data request (for file uploads).
+     * Do NOT set Content-Type — the browser sets it with the correct boundary.
+     */
+    private async requestFormData<T>(
+        endpoint: string,
+        formData: FormData,
+        method: 'POST' | 'PUT' = 'POST'
+    ): Promise<ApiResponse<T>> {
+        const token = this.getToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                method,
+                headers,
+                body: formData,
+            });
+
+            let data: any = null;
+            try {
+                data = await response.json();
+            } catch {
+                data = { message: 'Non-JSON response from server' };
+            }
+
+            if (!response.ok) {
+                let errorMessage = data.error || data.message || `Request failed: ${response.statusText}`;
+                if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+                    errorMessage = data.errors.map((err: any) => err.msg || err.message).join(', ');
+                }
+                return { error: errorMessage, errors: data.errors, status: response.status };
+            }
+
+            return { data, status: response.status };
+        } catch (error) {
+            console.error('Network Error:', error);
+            return {
+                error: error instanceof Error ? error.message : 'Network error',
+                status: 0,
+            };
+        }
+    }
+
     // Auth endpoints
     async signup(userData: any) {
         return this.request<{ token: string; user: any }>('/auth/signup', {
@@ -164,18 +209,12 @@ class ApiClient {
         });
     }
 
-    async createComplaint(complaintData: any) {
-        return this.request<{ complaint: any }>('/complaints', {
-            method: 'POST',
-            body: JSON.stringify(complaintData),
-        });
+    async createComplaint(formData: FormData) {
+        return this.requestFormData<{ complaint: any }>('/complaints', formData, 'POST');
     }
 
-    async updateComplaint(id: string, updates: any) {
-        return this.request<{ complaint: any }>(`/complaints/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(updates),
-        });
+    async updateComplaint(id: string, formData: FormData) {
+        return this.requestFormData<{ complaint: any }>(`/complaints/${id}`, formData, 'PUT');
     }
 
     async updateComplaintStatus(

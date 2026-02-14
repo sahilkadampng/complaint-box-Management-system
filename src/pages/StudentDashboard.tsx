@@ -98,14 +98,18 @@ const StudentDashboard: React.FC = () => {
 
     const handleComplaintSubmit = async (complaint: Complaint) => {
         try {
+            // Build FormData for multipart upload
+            const fd = new FormData();
+            fd.append('title', complaint.title);
+            fd.append('description', complaint.description);
+            fd.append('category', complaint.category);
+            if (complaint.attachmentFile) {
+                fd.append('attachment', complaint.attachmentFile);
+            }
+
             if (editingComplaint) {
                 // Update existing complaint
-                const response = await apiClient.updateComplaint(complaint.id, {
-                    title: complaint.title,
-                    description: complaint.description,
-                    category: complaint.category,
-                    attachment: complaint.attachment,
-                });
+                const response = await apiClient.updateComplaint(complaint.id, fd);
 
                 if (response.error) {
                     addNotification?.({ type: 'error', message: response.error });
@@ -120,14 +124,10 @@ const StudentDashboard: React.FC = () => {
                 }
             } else {
                 // Create new complaint
-                const response = await apiClient.createComplaint({
-                    title: complaint.title,
-                    description: complaint.description,
-                    category: complaint.category,
-                    attachment: complaint.attachment,
-                    department: complaint.department,
-                    yearOfStudy: complaint.yearOfStudy,
-                });
+                if (complaint.department) fd.append('department', complaint.department);
+                if (complaint.yearOfStudy) fd.append('yearOfStudy', complaint.yearOfStudy);
+
+                const response = await apiClient.createComplaint(fd);
 
                 if (response.error) {
                     addNotification?.({ type: 'error', message: response.error });

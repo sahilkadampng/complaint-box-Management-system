@@ -47,6 +47,7 @@ export interface Complaint {
     status: ComplaintStatus;
     history: ComplaintHistory[];
     attachment?: string;
+    attachmentFile?: File; // Raw file for upload (not saved; used only during submission)
     department?: string;
     yearOfStudy?: string;
     isRead?: boolean;
@@ -105,12 +106,18 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({ complaint, onSubmit, onCa
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setUploadedFile(file); // store actual file object
-            const reader = new FileReader();
-            reader.onload = () => {
-                setFormData(prev => ({ ...prev, attachment: reader.result as string }));
-            };
-            reader.readAsDataURL(file);
+            // Validate file type
+            const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+            if (!allowed.includes(file.type)) {
+                addNotification?.({ type: 'error', message: 'Only JPG, PNG, WebP, and PDF files are allowed.' });
+                return;
+            }
+            // Validate size (10 MB)
+            if (file.size > 10 * 1024 * 1024) {
+                addNotification?.({ type: 'error', message: 'File size must be under 10 MB.' });
+                return;
+            }
+            setUploadedFile(file);
         }
     };
 
@@ -140,7 +147,8 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({ complaint, onSubmit, onCa
                 createdAt: complaint?.createdAt || nowISO,
                 status: complaint?.status ?? 'submitted',
                 history: complaint?.history ?? [{ status: 'submitted', date: nowISO }],
-                attachment: formData.attachment
+                attachment: complaint?.attachment || '', // Existing URL (for edits)
+                attachmentFile: uploadedFile || undefined, // New file to upload
             };
 
             onSubmit(complaintData);
