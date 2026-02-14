@@ -443,8 +443,9 @@ export default function HomePage() {
                 <footer className="bg-card border-t border-border py-8 mt-16">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <p className="text-sm text-muted-foreground">
-                            © 2026 ResolvexPro • Made with ❤️ by sahil kadam
+                            © 2026 ResolvexPro • All rights reserved.
                         </p>
+                        <p className="text-sm text-muted-foreground">Made with ❤️ by <span className="text-sm text-pink-500">sahil kadam</span></p>
                     </div>
                 </footer>
             </div>
