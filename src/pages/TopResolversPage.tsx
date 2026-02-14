@@ -21,8 +21,8 @@ const TopResolversPage: React.FC = () => {
             try {
                 // Fetch all resolved complaints and faculty users in parallel
                 const [complaintsRes, usersRes] = await Promise.all([
-                    apiClient.getComplaints({ status: 'resolved', limit: 1000 }),
-                    apiClient.getUsers({ role: 'faculty', limit: 1000 }),
+                    apiClient.getComplaints({ status: 'resolved', limit: 50 }),
+                    apiClient.getUsers({ role: 'faculty', limit: 50 }),
                 ]);
 
                 if (complaintsRes.error) {

@@ -55,7 +55,7 @@ export default function HomePage() {
 
         // Try backend first (authorised users)
         try {
-            const res = await apiClient.getComplaints({ limit: 1000, status: "resolved" });
+            const res = await apiClient.getComplaints({ limit: 50, status: "resolved" });
             if (res.data?.complaints) {
                 const resolvedFromApi = res.data.complaints.length;
                 setComplaintsResolved(resolvedFromApi);

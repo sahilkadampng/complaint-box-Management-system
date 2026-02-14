@@ -16,7 +16,7 @@ const StudentAnalyticsPage: React.FC = () => {
         if (!user) return;
         (async () => {
             try {
-                const res = await apiClient.getComplaints({ limit: 1000 });
+                const res = await apiClient.getComplaints({ limit: 50 });
                 if (!res.error && res.data) {
                     setComplaints(res.data.complaints || []);
                 } else {

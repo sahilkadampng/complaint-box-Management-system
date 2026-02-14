@@ -68,7 +68,7 @@ export default function StudentReportsPage() {
         const loadComplaints = async () => {
             setLoading(true);
             try {
-                const response = await apiClient.getComplaints({ limit: 1000 });
+                const response = await apiClient.getComplaints({ limit: 50 });
                 if (response.error) {
                     addNotification?.({ type: "error", message: response.error });
                     setComplaints([]);

@@ -36,8 +36,8 @@ const ViewStudentsPage: React.FC = () => {
     useEffect(() => {
         (async () => {
             try {
-                const studentsRes = await apiClient.getUsers({ role: 'student', limit: 1000 });
-                const facultyRes = await apiClient.getUsers({ role: 'faculty', limit: 1000 });
+                const studentsRes = await apiClient.getUsers({ role: 'student', limit: 50 });
+                const facultyRes = await apiClient.getUsers({ role: 'faculty', limit: 50 });
 
                 if (studentsRes.error) {
                     console.error('Failed to load students:', studentsRes.error);

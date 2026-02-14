@@ -10,7 +10,7 @@ import type { Complaint, User, NewUserForm } from './dashboard.types';
  * Fetch all complaints from the API
  */
 export async function fetchComplaints(): Promise<Complaint[]> {
-    const response = await apiClient.getComplaints({ limit: 1000 });
+    const response = await apiClient.getComplaints({ limit: 50 });
     return response.data?.complaints || [];
 }
 
@@ -18,7 +18,7 @@ export async function fetchComplaints(): Promise<Complaint[]> {
  * Fetch all users from the API
  */
 export async function fetchUsers(): Promise<User[]> {
-    const response = await apiClient.getUsers({ limit: 1000 });
+    const response = await apiClient.getUsers({ limit: 50 });
     return response.data?.users || [];
 }
 

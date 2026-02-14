@@ -57,7 +57,7 @@ const AnalyticsPage: React.FC = () => {
         (async () => {
             setIsLoading(true);
             try {
-                const res = await apiClient.getComplaints({ limit: 1000 });
+                const res = await apiClient.getComplaints({ limit: 50 });
                 if (res.error) {
                     console.error('Failed to fetch complaints for analytics:', res.error);
                     setComplaints([]);

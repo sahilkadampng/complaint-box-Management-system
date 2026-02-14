@@ -84,7 +84,7 @@ export default function ReportsPage() {
             setLoading(true);
             setError(null);
             try {
-                const response = await apiClient.getComplaints({ limit: 1000 });
+                const response = await apiClient.getComplaints({ limit: 50 });
                 if (response.error) {
                     setError(response.error);
                     setComplaints([]);

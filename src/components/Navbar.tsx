@@ -57,7 +57,7 @@ const Navbar: React.FC = () => {
     useEffect(() => {
         const loadNotifications = async () => {
             try {
-                const response = await apiClient.getComplaints({ limit: 1000 });
+                const response = await apiClient.getComplaints({ limit: 50 });
                 if (response.data?.complaints) {
                     setComplaints(response.data.complaints);
 
