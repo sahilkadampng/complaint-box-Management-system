@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, Users, } from 'lucide-react';
+import { GraduationCap } from 'lucide-react';
 import { Eye, EyeOff } from 'lucide-react';
 import topLeftImg from '@/assets/8094458.jpg'
 import midRightImg from '@/assets/Secure login-rafiki.png'
@@ -19,7 +19,7 @@ const Signup: React.FC = () => {
     const { addNotification } = useNotification();
     const navigate = useNavigate();
 
-    const [selectedRole, setSelectedRole] = useState<'student' | 'faculty' | null>(null);
+    const [selectedRole, setSelectedRole] = useState<'student' | 'faculty' | null>(null); // Faculty signup disabled
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -86,15 +86,16 @@ const Signup: React.FC = () => {
             }
         }
 
-        if (selectedRole === 'faculty') {
-            if (!formData.name.trim() || !formData.email.trim() || !formData.username.trim() || !formData.password || !formData.department || !formData.program) {
-                addNotification({
-                    type: 'error',
-                    message: 'Please fill in all faculty information fields'
-                });
-                return;
-            }
-        }
+        // Faculty signup disabled
+        // if (selectedRole === 'faculty') {
+        //     if (!formData.name.trim() || !formData.email.trim() || !formData.username.trim() || !formData.password || !formData.department || !formData.program) {
+        //         addNotification({
+        //             type: 'error',
+        //             message: 'Please fill in all faculty information fields'
+        //         });
+        //         return;
+        //     }
+        // }
 
         if (!agreedToTerms) {
             addNotification({
@@ -367,7 +368,7 @@ const Signup: React.FC = () => {
                                                 </CardContent>
                                             </Card>
 
-                                            <Card
+                                            {/* <Card
                                                 className={`cursor-pointer transition-all duration-200 ${selectedRole === 'faculty'
                                                     ? 'ring-2 ring-primary bg-primary/5'
                                                     : 'hover:shadow-hover'
@@ -379,12 +380,12 @@ const Signup: React.FC = () => {
                                                     <h4 className="font-semibold text-foreground mb-2">Faculty</h4>
                                                     <p className="text-sm text-muted-foreground">I am a faculty member or staff</p>
                                                 </CardContent>
-                                            </Card>
+                                            </Card> */}
                                         </div>
                                     </div>
 
-                                    {/* Faculty Information */}
-                                    {selectedRole === 'faculty' && (
+                                    {/* Faculty Information - Commented out (Faculty signup disabled) */}
+                                    {/* {selectedRole === 'faculty' && (
                                         <div>
                                             <h3 className="text-lg font-semibold text-foreground mb-4">Faculty Information</h3>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -428,7 +429,7 @@ const Signup: React.FC = () => {
                                                 )}
                                             </div>
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {/* Student Information */}
                                     {selectedRole === 'student' && (

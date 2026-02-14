@@ -33,11 +33,17 @@ const FacultyDashboard: React.FC = () => {
     const [filterStatus, setFilterStatus] = useState<'all' | ComplaintStatus>('all');
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [sortBy, setSortBy] = useState<string>('newest');
-    
+
     // Clarification dialog state
     const [showClarificationDialog, setShowClarificationDialog] = useState(false);
     const [clarificationMessage, setClarificationMessage] = useState('');
     const [pendingComplaintId, setPendingComplaintId] = useState<string | null>(null);
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalComplaints, setTotalComplaints] = useState(0);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
 
     // Normalize API complaint to frontend format
     const normalizeComplaint = (apiComplaint: any): Complaint => {
@@ -77,9 +83,10 @@ const FacultyDashboard: React.FC = () => {
     };
 
     useEffect(() => {
-        const loadComplaints = async () => {
+        const loadComplaints = async (page = 1, append = false) => {
             try {
-                const response = await apiClient.getComplaints({ limit: 1000 });
+                setIsLoadingMore(page > 1);
+                const response = await apiClient.getComplaints({ limit: 50, page });
 
                 if (response.error) {
                     const message = response.error;
@@ -88,20 +95,61 @@ const FacultyDashboard: React.FC = () => {
                     if (isAuthError) {
                         navigate('/login', { replace: true });
                     }
-                    setComplaints([]);
+                    if (!append) setComplaints([]);
                 } else if (response.data) {
                     const normalizedComplaints = response.data.complaints.map(normalizeComplaint);
-                    setComplaints(normalizedComplaints);
+
+                    if (append) {
+                        setComplaints(prev => [...prev, ...normalizedComplaints]);
+                    } else {
+                        setComplaints(normalizedComplaints);
+                    }
+
+                    // Update pagination info
+                    setCurrentPage(response.data.pagination.page);
+                    setTotalPages(response.data.pagination.pages);
+                    setTotalComplaints(response.data.pagination.total);
                 }
             } catch (error) {
                 console.error('Error loading complaints:', error);
                 addNotification?.({ type: 'error', message: 'Failed to load complaints. Please check your connection or login again.' });
-                setComplaints([]);
+                if (!append) setComplaints([]);
+            } finally {
+                setIsLoadingMore(false);
             }
         };
 
-        loadComplaints();
+        loadComplaints(1, false);
     }, []);
+
+    // Function to load more complaints
+    const handleLoadMore = () => {
+        if (currentPage < totalPages && !isLoadingMore) {
+            const loadComplaints = async (page: number) => {
+                try {
+                    setIsLoadingMore(true);
+                    const response = await apiClient.getComplaints({ limit: 50, page });
+
+                    if (response.error) {
+                        addNotification?.({ type: 'error', message: response.error });
+                    } else if (response.data) {
+                        const normalizedComplaints = response.data.complaints.map(normalizeComplaint);
+                        setComplaints(prev => [...prev, ...normalizedComplaints]);
+                        setCurrentPage(response.data.pagination.page);
+                        setTotalPages(response.data.pagination.pages);
+                        setTotalComplaints(response.data.pagination.total);
+                    }
+                } catch (error) {
+                    console.error('Error loading more complaints:', error);
+                    addNotification?.({ type: 'error', message: 'Failed to load more complaints' });
+                } finally {
+                    setIsLoadingMore(false);
+                }
+            };
+
+            loadComplaints(currentPage + 1);
+        }
+    };
 
     useEffect(() => {
         let filtered = complaints.filter(complaint => {
@@ -151,7 +199,7 @@ const FacultyDashboard: React.FC = () => {
                 const updated = normalizeComplaint(response.data.complaint);
                 setComplaints(prev => prev.map(c => c.id === updated.id ? updated : c));
                 addNotification?.({ type: 'success', message: 'Complaint status updated successfully' });
-                
+
                 if (newStatus === 'need_clarification') {
                     addNotification?.({ type: 'info', message: 'Student will be notified about the clarification needed' });
                 }
@@ -161,7 +209,7 @@ const FacultyDashboard: React.FC = () => {
             addNotification?.({ type: 'error', message: 'Failed to update complaint status' });
         }
     };
-    
+
     const handleClarificationSubmit = () => {
         if (!clarificationMessage.trim()) {
             addNotification?.({ type: 'error', message: 'Please enter a clarification message' });
@@ -177,6 +225,7 @@ const FacultyDashboard: React.FC = () => {
         setPendingComplaintId(null);
     };
     const handleRegisterUser = () => navigate('/register');
+    const handleFacultySignup = () => navigate('/faculty-dashboard/faculty-signup');
 
     const handleExport = () => {
         const doc = new jsPDF({
@@ -345,6 +394,9 @@ const FacultyDashboard: React.FC = () => {
                                 </Button> */}
                                 <Button variant="secondary" size="sm" onClick={handleRegisterUser}>
                                     <Users className="h-4 w-4 mr-2" /> Register New User
+                                </Button>
+                                <Button variant="secondary" size="sm" onClick={handleFacultySignup} className="bg-blue-500 hover:bg-blue-600 text-white">
+                                    <Users className="h-4 w-4 mr-2" /> Add Faculty
                                 </Button>
                                 <Button variant="secondary" size="sm" onClick={handleExport}>
                                     <Download className="h-4 w-4 mr-2" /> Export Report
@@ -552,6 +604,29 @@ const FacultyDashboard: React.FC = () => {
                                         )}
                                     </CardContent>
                                 </Card>
+                                {/* Load More Button */}
+                                {currentPage < totalPages && (
+                                    <div className="flex flex-col items-center gap-3 mt-6 pb-6">
+                                        <p className="text-sm text-muted-foreground">
+                                            Showing {filteredComplaints.length} of {totalComplaints} complaints
+                                        </p>
+                                        <Button
+                                            onClick={handleLoadMore}
+                                            disabled={isLoadingMore}
+                                            variant="outline"
+                                            className="w-full max-w-md"
+                                        >
+                                            {isLoadingMore ? (
+                                                <>
+                                                    <span className="animate-spin mr-2">⏳</span>
+                                                    Loading...
+                                                </>
+                                            ) : (
+                                                <>Load More Complaints ({totalComplaints - filteredComplaints.length} remaining)</>
+                                            )}
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

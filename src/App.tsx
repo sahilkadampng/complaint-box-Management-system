@@ -17,6 +17,7 @@ import RoleSelection from "./pages/RoleSelection";
 import StudentDashboard from "./pages/StudentDashboard";
 import FacultyDashboard from "./pages/FacultyDashboard";
 // import FacultyProfile from "./pages/FacultyProfile";
+import FacultySignup from "./pages/FacultySignup";
 import AdminDashboard from "./pages/AdminDashboard";
 import Profile from './pages/Profile';
 import ViewStudentsPage from "./pages/ViewStudentsPage";
@@ -143,6 +144,11 @@ const App = () => {
                                                 <Route path="register" element={
                                                     <ProtectedRoute>
                                                         <RegisterUserPage />
+                                                    </ProtectedRoute>
+                                                } />
+                                                <Route path="faculty-signup" element={
+                                                    <ProtectedRoute>
+                                                        <FacultySignup />
                                                     </ProtectedRoute>
                                                 } />
                                                 <Route path="AnalyticsPage" element={
