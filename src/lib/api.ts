@@ -10,6 +10,7 @@ interface ApiResponse<T> {
     data?: T;
     error?: string;
     errors?: Array<{ msg: string; param: string }>;
+    status?: number;
 }
 
 class ApiClient {
@@ -68,14 +69,16 @@ class ApiClient {
                 return {
                     error: errorMessage,
                     errors: data.errors,
+                    status: response.status,
                 };
             }
 
-            return { data };
+            return { data, status: response.status };
         } catch (error) {
             console.error('Network Error:', error);
             return {
                 error: error instanceof Error ? error.message : 'Network error',
+                status: 0, // 0 = network/abort error (no HTTP response)
             };
         }
     }
@@ -95,9 +98,10 @@ class ApiClient {
         });
     }
 
-    async getCurrentUser() {
+    async getCurrentUser(options?: { signal?: AbortSignal }) {
         return this.request<{ user: any }>('/auth/me', {
             method: 'GET',
+            signal: options?.signal,
         });
     }
 

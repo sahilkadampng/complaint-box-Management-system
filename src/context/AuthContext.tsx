@@ -70,33 +70,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Clean up any legacy 'currentUser' left in localStorage (migration)
         try { localStorage.removeItem('currentUser'); } catch (e) { /* ignore */ }
 
-        // If we have a token, fetch current user from backend and populate state (token-only storage)
         const token = localStorage.getItem('token');
         if (!token) {
             setLoading(false);
             return;
         }
 
+        // AbortController prevents stale state updates if component unmounts mid-request
+        // (e.g. user refreshes rapidly before getCurrentUser() resolves)
+        const controller = new AbortController();
+
         (async () => {
             try {
-                const res = await apiClient.getCurrentUser();
+                const res = await apiClient.getCurrentUser({ signal: controller.signal });
+
+                // If aborted (rapid refresh), do nothing — don't touch token or state
+                if (controller.signal.aborted) return;
+
                 if (!res.error && res.data?.user) {
                     const normalized = normalizeUser(res.data.user);
                     if (normalized) {
                         setUser(normalized);
                         setIsAuthenticated(true);
                     }
-                } else {
-                    // Invalid/expired token: remove it
+                } else if (res.status === 401 || res.status === 403) {
+                    // Token is genuinely invalid/expired — clear it
                     localStorage.removeItem('token');
                 }
-            } catch (err) {
+                // For network errors (status 0) or 5xx: keep the token, just finish loading.
+                // User can retry by refreshing — their token is preserved.
+            } catch (err: any) {
+                // AbortError from rapid refresh — token stays safe
+                if (err?.name === 'AbortError') return;
                 console.error('Failed to fetch current user on init:', err);
-                localStorage.removeItem('token');
+                // Network-level failure: do NOT remove token
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
         })();
+
+        return () => controller.abort();
     }, []);
 
     // ---------------- LOGIN (BACKEND) ----------------
