@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { NetworkProvider } from "@/context/NetworkContext";
 import Notification from "@/components/Notification";
+import { Skeleton } from "@/components/ui/skeleton";
 import Index from "./pages/basic";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
@@ -40,10 +41,41 @@ import TopResolversPage from "./pages/TopResolversPage";
 
 const queryClient = new QueryClient();
 
-// Full-screen loading spinner shown while auth state is being resolved
+// Full-screen skeleton shown while auth state is being resolved
 const AuthLoading: React.FC = () => (
-    <div className="flex items-center justify-center h-screen w-screen bg-background">
-        <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent" />
+    <div className="h-screen w-screen bg-background flex">
+        {/* Sidebar skeleton */}
+        <div className="hidden md:flex flex-col w-64 border-r border-border p-4 gap-4">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+        </div>
+        {/* Main content skeleton */}
+        <div className="flex-1 flex flex-col">
+            {/* Navbar skeleton */}
+            <div className="h-16 border-b border-border flex items-center px-6 gap-4">
+                <Skeleton className="h-8 w-8 rounded-full" />
+                <Skeleton className="h-4 w-40" />
+                <div className="ml-auto flex gap-3">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                </div>
+            </div>
+            {/* Body skeleton */}
+            <div className="p-6 space-y-6">
+                <Skeleton className="h-8 w-60" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Skeleton className="h-28 rounded-xl" />
+                    <Skeleton className="h-28 rounded-xl" />
+                    <Skeleton className="h-28 rounded-xl" />
+                </div>
+                <Skeleton className="h-64 rounded-xl" />
+            </div>
+        </div>
     </div>
 );
 
