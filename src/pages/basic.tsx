@@ -71,16 +71,8 @@ export default function HomePage() {
 
     useEffect(() => {
         loadResolvedCount();
-
-        // Refresh on interval and when window regains focus
-        const intervalId = window.setInterval(loadResolvedCount, 15000);
-        const onFocus = () => loadResolvedCount();
-        window.addEventListener("focus", onFocus);
-
-        return () => {
-            window.clearInterval(intervalId);
-            window.removeEventListener("focus", onFocus);
-        };
+        const intervalId = window.setInterval(loadResolvedCount, 60000);
+        return () => window.clearInterval(intervalId);
     }, [loadResolvedCount]);
 
     console.log("bakchodi mat karna 🌹");
