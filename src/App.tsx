@@ -40,12 +40,21 @@ import TopResolversPage from "./pages/TopResolversPage";
 
 const queryClient = new QueryClient();
 
+// Full-screen loading spinner shown while auth state is being resolved
+const AuthLoading: React.FC = () => (
+    <div className="flex items-center justify-center h-screen w-screen bg-background">
+        <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent" />
+    </div>
+);
+
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requireRole?: boolean }> = ({
     children,
     requireRole = false
 }) => {
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated, user, loading } = useAuth();
+
+    if (loading) return <AuthLoading />;
 
     if (!isAuthenticated) {
         return <Navigate to="/login" replace />;
@@ -60,7 +69,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireRole?: boolea
 
 // Public Route Component (redirects to dashboard if already logged in)
 const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated, user } = useAuth();
+    const { isAuthenticated, user, loading } = useAuth();
+
+    if (loading) return <AuthLoading />;
 
     if (isAuthenticated && user?.role) {
         if (user.role === 'student') {

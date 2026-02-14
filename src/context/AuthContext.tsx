@@ -32,6 +32,7 @@ interface AuthContextType {
     setUserRole: (role: 'student' | 'faculty') => Promise<void>;
     updateUser: (data: Partial<User> & { password?: string }) => Promise<void>;
     isAuthenticated: boolean;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -63,6 +64,7 @@ const normalizeUser = (u: any): User | null => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         // Clean up any legacy 'currentUser' left in localStorage (migration)
@@ -70,7 +72,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // If we have a token, fetch current user from backend and populate state (token-only storage)
         const token = localStorage.getItem('token');
-        if (!token) return;
+        if (!token) {
+            setLoading(false);
+            return;
+        }
 
         (async () => {
             try {
@@ -88,6 +93,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } catch (err) {
                 console.error('Failed to fetch current user on init:', err);
                 localStorage.removeItem('token');
+            } finally {
+                setLoading(false);
             }
         })();
     }, []);
@@ -189,7 +196,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             logout,
             setUserRole,
             updateUser,
-            isAuthenticated
+            isAuthenticated,
+            loading
         }}>
             {children}
         </AuthContext.Provider>
