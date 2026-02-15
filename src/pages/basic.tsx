@@ -21,10 +21,11 @@ import studentImg10 from '@/assets/young-guy-brunette-semi-flat-vector-character
 
 export default function HomePage() {
     const [complaintsResolved, setComplaintsResolved] = useState<number>(0);
+    const [avgResponseTime, setAvgResponseTime] = useState<string>("--");
 
     const stats = [
         { label: "Complaints Resolved", value: `${complaintsResolved}+`, accent: "text-black" },
-        { label: "Avg Response Time", value: "48h", accent: "text-black" },
+        { label: "Avg Response Time", value: avgResponseTime, accent: "text-black" },
         { label: "Satisfaction Rate", value: "95%", accent: "text-black" },
     ];
 
@@ -56,9 +57,31 @@ export default function HomePage() {
         // Try backend first (authorised users)
         try {
             const res = await apiClient.getComplaints({ limit: 50, status: "resolved" });
-            if (res.data?.complaints) {
-                const resolvedFromApi = res.data.complaints.length;
-                setComplaintsResolved(resolvedFromApi);
+            if (res.data) {
+                // Use pagination.total for the real count (not capped by limit)
+                const total = res.data.pagination?.total ?? res.data.complaints?.length ?? 0;
+                setComplaintsResolved(total);
+
+                // Compute avg response time from fetched complaints
+                const complaints = res.data.complaints || [];
+                const durations: number[] = [];
+                for (const c of complaints) {
+                    if (c.createdAt && c.history?.length) {
+                        const resolvedEntry = [...c.history].reverse().find((h: any) => h.status === 'resolved');
+                        if (resolvedEntry?.date) {
+                            const created = new Date(c.createdAt).getTime();
+                            const resolved = new Date(resolvedEntry.date).getTime();
+                            if (resolved > created) durations.push(resolved - created);
+                        }
+                    }
+                }
+                if (durations.length > 0) {
+                    const avgMs = durations.reduce((a, b) => a + b, 0) / durations.length;
+                    const avgHours = avgMs / (1000 * 60 * 60);
+                    if (avgHours < 1) setAvgResponseTime(`${Math.round(avgHours * 60)}m`);
+                    else if (avgHours < 48) setAvgResponseTime(`${Math.round(avgHours)}h`);
+                    else setAvgResponseTime(`${Math.round(avgHours / 24)}d`);
+                }
                 return;
             }
         } catch (err) {
@@ -74,8 +97,6 @@ export default function HomePage() {
         const intervalId = window.setInterval(loadResolvedCount, 60000);
         return () => window.clearInterval(intervalId);
     }, [loadResolvedCount]);
-
-    console.log("bakchodi mat karna 🌹");
 
     // const handleComplaintSubmit = () => {
     //     setComplaintsResolved(prev => prev + 1);
@@ -387,7 +408,7 @@ export default function HomePage() {
                         <div className="text-center mb-16">
                             <h3 className="text-3xl font-bold text-foreground mb-4">What Students Say</h3>
                             <p className="text-muted-foreground max-w-2xl mx-auto">
-                                feedback from students and faculty using ComplaintHub daily.
+                                feedback from students and faculty using ResolvexPro daily.
                             </p>
                         </div>
 
