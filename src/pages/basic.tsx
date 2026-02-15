@@ -30,66 +30,29 @@ export default function HomePage() {
     ];
 
     const loadResolvedCount = useCallback(async () => {
-        // If not authenticated, skip API and use local snapshot
-        const token = localStorage.getItem("token");
-
-        // Helper: local fallback
-        const loadFromLocal = () => {
-            try {
-                const savedComplaints = localStorage.getItem("complaints");
-                if (!savedComplaints) {
-                    setComplaintsResolved(0);
-                    return;
-                }
-                const parsed: any[] = JSON.parse(savedComplaints);
-                const resolvedCount = parsed.filter((c) => c.status === "resolved").length;
-                setComplaintsResolved(resolvedCount);
-            } catch (err) {
-                setComplaintsResolved(0);
-            }
-        };
-
-        if (!token) {
-            loadFromLocal();
-            return;
-        }
-
-        // Try backend first (authorised users)
         try {
-            const res = await apiClient.getComplaints({ limit: 50, status: "resolved" });
+            // Use public stats endpoint (no auth required)
+            const res = await apiClient.getPublicStats();
             if (res.data) {
-                // Use pagination.total for the real count (not capped by limit)
-                const total = res.data.pagination?.total ?? res.data.complaints?.length ?? 0;
-                setComplaintsResolved(total);
-
-                // Compute avg response time from fetched complaints
-                const complaints = res.data.complaints || [];
-                const durations: number[] = [];
-                for (const c of complaints) {
-                    if (c.createdAt && c.history?.length) {
-                        const resolvedEntry = [...c.history].reverse().find((h: any) => h.status === 'resolved');
-                        if (resolvedEntry?.date) {
-                            const created = new Date(c.createdAt).getTime();
-                            const resolved = new Date(resolvedEntry.date).getTime();
-                            if (resolved > created) durations.push(resolved - created);
-                        }
-                    }
-                }
-                if (durations.length > 0) {
-                    const avgMs = durations.reduce((a, b) => a + b, 0) / durations.length;
-                    const avgHours = avgMs / (1000 * 60 * 60);
-                    if (avgHours < 1) setAvgResponseTime(`${Math.round(avgHours * 60)}m`);
-                    else if (avgHours < 48) setAvgResponseTime(`${Math.round(avgHours)}h`);
-                    else setAvgResponseTime(`${Math.round(avgHours / 24)}d`);
-                }
+                setComplaintsResolved(res.data.resolvedCount);
+                setAvgResponseTime(res.data.avgResponseTime);
                 return;
             }
         } catch (err) {
-            // Silently fallback (common when token is invalid/expired)
+            // Silently fail - stats are not critical
         }
 
-        // Fallback: localStorage
-        loadFromLocal();
+        // Fallback: localStorage for offline/error scenarios
+        try {
+            const savedComplaints = localStorage.getItem("complaints");
+            if (savedComplaints) {
+                const parsed: any[] = JSON.parse(savedComplaints);
+                const resolvedCount = parsed.filter((c) => c.status === "resolved").length;
+                setComplaintsResolved(resolvedCount);
+            }
+        } catch {
+            setComplaintsResolved(0);
+        }
     }, []);
 
     useEffect(() => {

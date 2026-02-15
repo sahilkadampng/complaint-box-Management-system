@@ -284,6 +284,13 @@ class ApiClient {
             body: body ? JSON.stringify(body) : undefined,
         });
     }
+
+    // Public stats (no auth required)
+    async getPublicStats() {
+        return this.request<{ resolvedCount: number; avgResponseTime: string }>('/utils/public-stats', {
+            method: 'GET',
+        });
+    }
 }
 
 export const apiClient = new ApiClient();
